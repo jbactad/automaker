@@ -70,6 +70,12 @@ export interface AutoModeAPI {
   onEvent: (callback: (event: AutoModeEvent) => void) => () => void;
 }
 
+export interface SaveImageResult {
+  success: boolean;
+  path?: string;
+  error?: string;
+}
+
 export interface ElectronAPI {
   ping: () => Promise<string>;
   openDirectory: () => Promise<DialogResult>;
@@ -82,6 +88,7 @@ export interface ElectronAPI {
   stat: (filePath: string) => Promise<StatResult>;
   deleteFile: (filePath: string) => Promise<WriteResult>;
   getPath: (name: string) => Promise<string>;
+  saveImageToTemp?: (data: string, filename: string, mimeType: string) => Promise<SaveImageResult>;
   autoMode?: AutoModeAPI;
 }
 
@@ -331,6 +338,21 @@ export const getElectronAPI = (): ElectronAPI => {
         return "/mock/userData";
       }
       return `/mock/${name}`;
+    },
+
+    // Save image to temp directory
+    saveImageToTemp: async (data: string, filename: string, mimeType: string) => {
+      // Generate a mock temp file path
+      const timestamp = Date.now();
+      const ext = mimeType.split("/")[1] || "png";
+      const safeName = filename.replace(/[^a-zA-Z0-9.-]/g, "_");
+      const tempFilePath = `/tmp/automaker-images/${timestamp}_${safeName}`;
+
+      // Store the image data in mock file system for testing
+      mockFileSystem[tempFilePath] = data;
+
+      console.log("[Mock] Saved image to temp:", tempFilePath);
+      return { success: true, path: tempFilePath };
     },
 
     // Mock Auto Mode API

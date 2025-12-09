@@ -1788,3 +1788,75 @@ export async function setupMockMultipleProjects(
     localStorage.setItem("automaker-storage", JSON.stringify(mockState));
   }, projectCount);
 }
+
+/**
+ * Get the description image dropzone element
+ */
+export async function getDescriptionImageDropzone(page: Page): Promise<Locator> {
+  return page.locator('[data-testid="feature-description-input"]');
+}
+
+/**
+ * Get the description image hidden input element
+ */
+export async function getDescriptionImageInput(page: Page): Promise<Locator> {
+  return page.locator('[data-testid="description-image-input"]');
+}
+
+/**
+ * Check if the description image previews section is visible
+ */
+export async function isDescriptionImagePreviewsVisible(page: Page): Promise<boolean> {
+  const previews = page.locator('[data-testid="description-image-previews"]');
+  return await previews.isVisible().catch(() => false);
+}
+
+/**
+ * Get the number of description image previews
+ */
+export async function getDescriptionImagePreviewCount(page: Page): Promise<number> {
+  const previews = page.locator('[data-testid^="description-image-preview-"]');
+  return await previews.count();
+}
+
+/**
+ * Upload an image to the description dropzone via the file input
+ */
+export async function uploadDescriptionImage(
+  page: Page,
+  imagePath: string
+): Promise<void> {
+  const input = page.locator('[data-testid="description-image-input"]');
+  await input.setInputFiles(imagePath);
+}
+
+/**
+ * Create a test PNG image as a data URL
+ */
+export function createTestImageDataUrl(): string {
+  // A tiny 1x1 transparent PNG as base64
+  return "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mNk+M9QDwADhgGAWjR9awAAAABJRU5ErkJggg==";
+}
+
+/**
+ * Wait for description image preview to appear
+ */
+export async function waitForDescriptionImagePreview(
+  page: Page,
+  options?: { timeout?: number }
+): Promise<Locator> {
+  const preview = page.locator('[data-testid^="description-image-preview-"]').first();
+  await preview.waitFor({
+    timeout: options?.timeout ?? 5000,
+    state: "visible",
+  });
+  return preview;
+}
+
+/**
+ * Check if the drop overlay is visible on the description area
+ */
+export async function isDropOverlayVisible(page: Page): Promise<boolean> {
+  const overlay = page.locator('[data-testid="drop-overlay"]');
+  return await overlay.isVisible().catch(() => false);
+}

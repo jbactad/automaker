@@ -44,6 +44,13 @@ export interface FeatureImage {
   size: number;
 }
 
+export interface FeatureImagePath {
+  id: string;
+  path: string; // Path to the temp file
+  filename: string;
+  mimeType: string;
+}
+
 export interface Feature {
   id: string;
   category: string;
@@ -51,6 +58,7 @@ export interface Feature {
   steps: string[];
   status: "backlog" | "in_progress" | "verified";
   images?: FeatureImage[];
+  imagePaths?: FeatureImagePath[]; // Paths to temp files for agent context
   startedAt?: string; // ISO timestamp for when the card moved to in_progress
   skipTests?: boolean; // When true, skip TDD approach and require manual verification
 }

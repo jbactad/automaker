@@ -16,7 +16,7 @@ import {
   SortableContext,
   verticalListSortingStrategy,
 } from "@dnd-kit/sortable";
-import { useAppStore, Feature, FeatureImage } from "@/store/app-store";
+import { useAppStore, Feature, FeatureImage, FeatureImagePath } from "@/store/app-store";
 import { getElectronAPI } from "@/lib/electron";
 import { cn } from "@/lib/utils";
 import {
@@ -31,6 +31,7 @@ import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { CategoryAutocomplete } from "@/components/ui/category-autocomplete";
 import { FeatureImageUpload } from "@/components/ui/feature-image-upload";
+import { DescriptionImageDropZone, FeatureImagePath as DescriptionImagePath } from "@/components/ui/description-image-dropzone";
 import {
   Dialog,
   DialogContent,
@@ -83,6 +84,7 @@ export function BoardView() {
     description: "",
     steps: [""],
     images: [] as FeatureImage[],
+    imagePaths: [] as DescriptionImagePath[],
     skipTests: false,
   });
   const [isLoading, setIsLoading] = useState(true);
@@ -395,6 +397,8 @@ export function BoardView() {
         steps: f.steps,
         status: f.status,
         startedAt: f.startedAt,
+        imagePaths: f.imagePaths,
+        skipTests: f.skipTests,
       }));
       await api.writeFile(
         `${currentProject.path}/.automaker/feature_list.json`,
@@ -519,11 +523,12 @@ export function BoardView() {
       steps: newFeature.steps.filter((s) => s.trim()),
       status: "backlog",
       images: newFeature.images,
+      imagePaths: newFeature.imagePaths,
       skipTests: newFeature.skipTests,
     });
     // Persist the category
     saveCategory(category);
-    setNewFeature({ category: "", description: "", steps: [""], images: [], skipTests: false });
+    setNewFeature({ category: "", description: "", steps: [""], images: [], imagePaths: [], skipTests: false });
     setShowAddDialog(false);
   };
 
@@ -1064,14 +1069,16 @@ export function BoardView() {
             </div>
             <div className="space-y-2">
               <Label htmlFor="description">Description</Label>
-              <Textarea
-                id="description"
-                placeholder="Describe the feature..."
+              <DescriptionImageDropZone
                 value={newFeature.description}
-                onChange={(e) =>
-                  setNewFeature({ ...newFeature, description: e.target.value })
+                onChange={(value) =>
+                  setNewFeature({ ...newFeature, description: value })
                 }
-                data-testid="feature-description-input"
+                images={newFeature.imagePaths}
+                onImagesChange={(images) =>
+                  setNewFeature({ ...newFeature, imagePaths: images })
+                }
+                placeholder="Describe the feature..."
               />
             </div>
             <div className="space-y-2">
