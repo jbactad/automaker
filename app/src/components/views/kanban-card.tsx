@@ -87,8 +87,7 @@ export function KanbanCard({
   // - skipTests items can be dragged even when in_progress or verified (unless currently running)
   // - Non-skipTests (TDD) items in progress or verified cannot be dragged
   const isDraggable =
-    feature.status === "backlog" ||
-    (feature.skipTests && !isCurrentAutoTask);
+    feature.status === "backlog" || (feature.skipTests && !isCurrentAutoTask);
   const {
     attributes,
     listeners,
@@ -111,7 +110,7 @@ export function KanbanCard({
       ref={setNodeRef}
       style={style}
       className={cn(
-        "cursor-grab active:cursor-grabbing transition-all backdrop-blur-sm border-white/10 relative",
+        "cursor-grab active:cursor-grabbing transition-all backdrop-blur-sm border-border relative",
         isDragging && "opacity-50 scale-105 shadow-lg",
         isCurrentAutoTask &&
           "border-purple-500 border-2 shadow-purple-500/50 shadow-lg animate-pulse"
@@ -122,7 +121,7 @@ export function KanbanCard({
       {/* Shortcut key badge for in-progress cards */}
       {shortcutKey && (
         <div
-          className="absolute top-2 left-2 px-1.5 py-0.5 text-[10px] font-mono rounded bg-white/10 border border-white/20 text-zinc-300 z-10"
+          className="absolute top-2 left-2 px-1.5 py-0.5 text-[10px] font-mono rounded bg-muted border border-border text-muted-foreground z-10"
           data-testid={`shortcut-key-${feature.id}`}
         >
           {shortcutKey}
@@ -399,7 +398,8 @@ export function KanbanCard({
           <DialogHeader>
             <DialogTitle>Delete Feature</DialogTitle>
             <DialogDescription>
-              Are you sure you want to delete this feature? This action cannot be undone.
+              Are you sure you want to delete this feature? This action cannot
+              be undone.
             </DialogDescription>
           </DialogHeader>
           <DialogFooter>

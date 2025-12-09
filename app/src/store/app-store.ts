@@ -2,8 +2,29 @@ import { create } from "zustand";
 import { persist } from "zustand/middleware";
 import type { Project } from "@/lib/electron";
 
-export type ViewMode = "welcome" | "spec" | "board" | "agent" | "settings" | "tools" | "interview" | "context";
-export type ThemeMode = "light" | "dark" | "system";
+export type ViewMode =
+  | "welcome"
+  | "spec"
+  | "board"
+  | "agent"
+  | "settings"
+  | "tools"
+  | "interview"
+  | "context";
+export type ThemeMode =
+  | "light"
+  | "dark"
+  | "system"
+  | "retro"
+  | "dracula"
+  | "nord"
+  | "monokai"
+  | "tokyonight"
+  | "solarized"
+  | "gruvbox"
+  | "catppuccin"
+  | "onedark"
+  | "synthwave";
 
 export interface ApiKeys {
   anthropic: string;
@@ -103,7 +124,15 @@ export interface AutoModeActivity {
   id: string;
   featureId: string;
   timestamp: Date;
-  type: "start" | "progress" | "tool" | "complete" | "error" | "planning" | "action" | "verification";
+  type:
+    | "start"
+    | "progress"
+    | "tool"
+    | "complete"
+    | "error"
+    | "planning"
+    | "action"
+    | "verification";
   message: string;
   tool?: string;
   passes?: boolean;
@@ -157,7 +186,9 @@ export interface AppActions {
   addRunningTask: (taskId: string) => void;
   removeRunningTask: (taskId: string) => void;
   clearRunningTasks: () => void;
-  addAutoModeActivity: (activity: Omit<AutoModeActivity, "id" | "timestamp">) => void;
+  addAutoModeActivity: (
+    activity: Omit<AutoModeActivity, "id" | "timestamp">
+  ) => void;
   clearAutoModeActivity: () => void;
   setMaxConcurrency: (max: number) => void;
 
@@ -200,11 +231,17 @@ export const useAppStore = create<AppState & AppActions>()(
         const existing = projects.findIndex((p) => p.path === project.path);
         if (existing >= 0) {
           const updated = [...projects];
-          updated[existing] = { ...project, lastOpened: new Date().toISOString() };
+          updated[existing] = {
+            ...project,
+            lastOpened: new Date().toISOString(),
+          };
           set({ projects: updated });
         } else {
           set({
-            projects: [...projects, { ...project, lastOpened: new Date().toISOString() }],
+            projects: [
+              ...projects,
+              { ...project, lastOpened: new Date().toISOString() },
+            ],
           });
         }
       },
@@ -242,7 +279,9 @@ export const useAppStore = create<AppState & AppActions>()(
       },
 
       addFeature: (feature) => {
-        const id = `feature-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`;
+        const id = `feature-${Date.now()}-${Math.random()
+          .toString(36)
+          .substr(2, 9)}`;
         set({ features: [...get().features, { ...feature, id }] });
       },
 
@@ -277,14 +316,19 @@ export const useAppStore = create<AppState & AppActions>()(
         const now = new Date();
         const session: ChatSession = {
           id: `chat-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`,
-          title: title || `Chat ${new Date().toLocaleDateString()} ${new Date().toLocaleTimeString()}`,
+          title:
+            title ||
+            `Chat ${new Date().toLocaleDateString()} ${new Date().toLocaleTimeString()}`,
           projectId: currentProject.id,
-          messages: [{
-            id: "welcome",
-            role: "assistant",
-            content: "Hello! I'm the Automaker Agent. I can help you build software autonomously. What would you like to create today?",
-            timestamp: now,
-          }],
+          messages: [
+            {
+              id: "welcome",
+              role: "assistant",
+              content:
+                "Hello! I'm the Automaker Agent. I can help you build software autonomously. What would you like to create today?",
+              timestamp: now,
+            },
+          ],
           createdAt: now,
           updatedAt: now,
           archived: false,
@@ -311,14 +355,18 @@ export const useAppStore = create<AppState & AppActions>()(
         const currentSession = get().currentChatSession;
         if (currentSession && currentSession.id === sessionId) {
           set({
-            currentChatSession: { ...currentSession, ...updates, updatedAt: new Date() }
+            currentChatSession: {
+              ...currentSession,
+              ...updates,
+              updatedAt: new Date(),
+            },
           });
         }
       },
 
       addMessageToSession: (sessionId, message) => {
         const sessions = get().chatSessions;
-        const sessionIndex = sessions.findIndex(s => s.id === sessionId);
+        const sessionIndex = sessions.findIndex((s) => s.id === sessionId);
 
         if (sessionIndex >= 0) {
           const updatedSessions = [...sessions];
@@ -334,7 +382,7 @@ export const useAppStore = create<AppState & AppActions>()(
           const currentSession = get().currentChatSession;
           if (currentSession && currentSession.id === sessionId) {
             set({
-              currentChatSession: updatedSessions[sessionIndex]
+              currentChatSession: updatedSessions[sessionIndex],
             });
           }
         }
@@ -356,7 +404,8 @@ export const useAppStore = create<AppState & AppActions>()(
         const currentSession = get().currentChatSession;
         set({
           chatSessions: get().chatSessions.filter((s) => s.id !== sessionId),
-          currentChatSession: currentSession?.id === sessionId ? null : currentSession,
+          currentChatSession:
+            currentSession?.id === sessionId ? null : currentSession,
         });
       },
 
@@ -375,13 +424,19 @@ export const useAppStore = create<AppState & AppActions>()(
       },
 
       removeRunningTask: (taskId) => {
-        set({ runningAutoTasks: get().runningAutoTasks.filter(id => id !== taskId) });
+        set({
+          runningAutoTasks: get().runningAutoTasks.filter(
+            (id) => id !== taskId
+          ),
+        });
       },
 
       clearRunningTasks: () => set({ runningAutoTasks: [] }),
 
       addAutoModeActivity: (activity) => {
-        const id = `activity-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`;
+        const id = `activity-${Date.now()}-${Math.random()
+          .toString(36)
+          .substr(2, 9)}`;
         const newActivity: AutoModeActivity = {
           ...activity,
           id,
