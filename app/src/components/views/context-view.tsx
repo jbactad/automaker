@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState, useCallback } from "react";
+import { useEffect, useState, useCallback, useMemo } from "react";
 import { useAppStore } from "@/store/app-store";
 import { getElectronAPI } from "@/lib/electron";
 import { Button } from "@/components/ui/button";
@@ -17,6 +17,11 @@ import {
   X,
   BookOpen,
 } from "lucide-react";
+import {
+  useKeyboardShortcuts,
+  ACTION_SHORTCUTS,
+  KeyboardShortcut,
+} from "@/hooks/use-keyboard-shortcuts";
 import {
   Dialog,
   DialogContent,
@@ -49,8 +54,23 @@ export function ContextView() {
   const [newFileName, setNewFileName] = useState("");
   const [newFileType, setNewFileType] = useState<"text" | "image">("text");
   const [uploadedImageData, setUploadedImageData] = useState<string | null>(null);
+  const [newFileContent, setNewFileContent] = useState("");
+  const [isDropHovering, setIsDropHovering] = useState(false);
 
-  // Get context directory path
+  // Keyboard shortcuts for this view
+  const contextShortcuts: KeyboardShortcut[] = useMemo(
+    () => [
+      {
+        key: ACTION_SHORTCUTS.addContextFile,
+        action: () => setIsAddDialogOpen(true),
+        description: "Add new context file",
+      },
+    ],
+    []
+  );
+  useKeyboardShortcuts(contextShortcuts);
+
+  // Get context directory path for user-added context files
   const getContextPath = useCallback(() => {
     if (!currentProject) return null;
     return `${currentProject.path}/.automaker/context`;
@@ -164,14 +184,16 @@ export function ContextView() {
         // Write image data
         await api.writeFile(filePath, uploadedImageData);
       } else {
-        // Write empty text file
-        await api.writeFile(filePath, "");
+        // Write text file with content (or empty if no content)
+        await api.writeFile(filePath, newFileContent);
       }
 
       setIsAddDialogOpen(false);
       setNewFileName("");
       setNewFileType("text");
       setUploadedImageData(null);
+      setNewFileContent("");
+      setIsDropHovering(false);
       await loadContextFiles();
     } catch (error) {
       console.error("Failed to add file:", error);
@@ -247,6 +269,49 @@ export function ContextView() {
     e.stopPropagation();
   };
 
+  // Handle drag and drop for .txt and .md files in the add context dialog textarea
+  const handleTextAreaDrop = async (e: React.DragEvent<HTMLTextAreaElement>) => {
+    e.preventDefault();
+    e.stopPropagation();
+    setIsDropHovering(false);
+
+    const files = Array.from(e.dataTransfer.files);
+    if (files.length === 0) return;
+
+    const file = files[0]; // Only handle the first file
+    const fileName = file.name.toLowerCase();
+
+    // Only accept .txt and .md files
+    if (!fileName.endsWith('.txt') && !fileName.endsWith('.md')) {
+      console.warn('Only .txt and .md files are supported for drag and drop');
+      return;
+    }
+
+    const reader = new FileReader();
+    reader.onload = (event) => {
+      const content = event.target?.result as string;
+      setNewFileContent(content);
+
+      // Auto-fill filename if empty
+      if (!newFileName) {
+        setNewFileName(file.name);
+      }
+    };
+    reader.readAsText(file);
+  };
+
+  const handleTextAreaDragOver = (e: React.DragEvent<HTMLTextAreaElement>) => {
+    e.preventDefault();
+    e.stopPropagation();
+    setIsDropHovering(true);
+  };
+
+  const handleTextAreaDragLeave = (e: React.DragEvent<HTMLTextAreaElement>) => {
+    e.preventDefault();
+    e.stopPropagation();
+    setIsDropHovering(false);
+  };
+
   if (!currentProject) {
     return (
       <div
@@ -303,6 +368,12 @@ export function ContextView() {
           >
             <Plus className="w-4 h-4 mr-2" />
             Add File
+            <span
+              className="ml-2 px-1.5 py-0.5 text-[10px] font-mono rounded bg-white/10 border border-white/20"
+              data-testid="shortcut-add-context-file"
+            >
+              {ACTION_SHORTCUTS.addContextFile}
+            </span>
           </Button>
         </div>
       </div>
@@ -480,6 +551,45 @@ export function ContextView() {
               />
             </div>
 
+            {newFileType === "text" && (
+              <div className="space-y-2">
+                <Label htmlFor="context-content">Context Content</Label>
+                <div
+                  className={cn(
+                    "relative rounded-lg transition-colors",
+                    isDropHovering && "ring-2 ring-brand-500"
+                  )}
+                >
+                  <textarea
+                    id="context-content"
+                    value={newFileContent}
+                    onChange={(e) => setNewFileContent(e.target.value)}
+                    onDrop={handleTextAreaDrop}
+                    onDragOver={handleTextAreaDragOver}
+                    onDragLeave={handleTextAreaDragLeave}
+                    placeholder="Enter context content here or drag & drop a .txt or .md file..."
+                    className={cn(
+                      "w-full h-40 p-3 font-mono text-sm bg-zinc-900 border border-zinc-700 rounded-lg resize-none focus:outline-none focus:ring-2 focus:ring-brand-500 focus:border-transparent",
+                      isDropHovering && "border-brand-500 bg-brand-500/10"
+                    )}
+                    spellCheck={false}
+                    data-testid="new-file-content"
+                  />
+                  {isDropHovering && (
+                    <div className="absolute inset-0 flex items-center justify-center bg-brand-500/20 rounded-lg pointer-events-none">
+                      <div className="flex flex-col items-center text-brand-400">
+                        <Upload className="w-8 h-8 mb-2" />
+                        <span className="text-sm font-medium">Drop .txt or .md file here</span>
+                      </div>
+                    </div>
+                  )}
+                </div>
+                <p className="text-xs text-zinc-500">
+                  Drag & drop .txt or .md files to import their content
+                </p>
+              </div>
+            )}
+
             {newFileType === "image" && (
               <div className="space-y-2">
                 <Label>Upload Image</Label>
@@ -520,6 +630,8 @@ export function ContextView() {
                 setIsAddDialogOpen(false);
                 setNewFileName("");
                 setUploadedImageData(null);
+                setNewFileContent("");
+                setIsDropHovering(false);
               }}
             >
               Cancel

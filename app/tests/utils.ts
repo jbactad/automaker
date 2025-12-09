@@ -1243,3 +1243,64 @@ export async function getVisibleNavItems(page: Page): Promise<string[]> {
 
   return items;
 }
+
+/**
+ * Press a keyboard shortcut key
+ */
+export async function pressShortcut(page: Page, key: string): Promise<void> {
+  await page.keyboard.press(key);
+}
+
+/**
+ * Check if a shortcut key indicator is visible for a navigation item
+ */
+export async function isShortcutIndicatorVisible(
+  page: Page,
+  navId: string
+): Promise<boolean> {
+  const shortcut = page.locator(`[data-testid="shortcut-${navId}"]`);
+  return await shortcut.isVisible().catch(() => false);
+}
+
+/**
+ * Get the shortcut key text for a navigation item
+ */
+export async function getShortcutKeyText(
+  page: Page,
+  navId: string
+): Promise<string | null> {
+  const shortcut = page.locator(`[data-testid="shortcut-${navId}"]`);
+  return await shortcut.textContent();
+}
+
+/**
+ * Focus on an input element to test that shortcuts don't fire when typing
+ */
+export async function focusOnInput(page: Page, testId: string): Promise<void> {
+  const input = page.locator(`[data-testid="${testId}"]`);
+  await input.focus();
+}
+
+/**
+ * Check if the add feature dialog is visible
+ */
+export async function isAddFeatureDialogVisible(page: Page): Promise<boolean> {
+  const dialog = page.locator('[data-testid="add-feature-dialog"]');
+  return await dialog.isVisible().catch(() => false);
+}
+
+/**
+ * Check if the add context file dialog is visible
+ */
+export async function isAddContextDialogVisible(page: Page): Promise<boolean> {
+  const dialog = page.locator('[data-testid="add-context-dialog"]');
+  return await dialog.isVisible().catch(() => false);
+}
+
+/**
+ * Close any open dialog by pressing Escape
+ */
+export async function closeDialogWithEscape(page: Page): Promise<void> {
+  await page.keyboard.press("Escape");
+  await page.waitForTimeout(100); // Give dialog time to close
+}

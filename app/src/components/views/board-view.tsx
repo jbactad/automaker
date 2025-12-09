@@ -47,6 +47,11 @@ import { Plus, RefreshCw, Play, StopCircle, Loader2, ChevronUp, ChevronDown, Use
 import { toast } from "sonner";
 import { Slider } from "@/components/ui/slider";
 import { useAutoMode } from "@/hooks/use-auto-mode";
+import {
+  useKeyboardShortcuts,
+  ACTION_SHORTCUTS,
+  KeyboardShortcut,
+} from "@/hooks/use-keyboard-shortcuts";
 
 type ColumnId = Feature["status"];
 
@@ -97,6 +102,19 @@ export function BoardView() {
 
   // Auto mode hook
   const autoMode = useAutoMode();
+
+  // Keyboard shortcuts for this view
+  const boardShortcuts: KeyboardShortcut[] = useMemo(
+    () => [
+      {
+        key: ACTION_SHORTCUTS.addFeature,
+        action: () => setShowAddDialog(true),
+        description: "Add new feature",
+      },
+    ],
+    []
+  );
+  useKeyboardShortcuts(boardShortcuts);
 
   // Prevent hydration issues
   useEffect(() => {
@@ -663,6 +681,12 @@ export function BoardView() {
           >
             <Plus className="w-4 h-4 mr-2" />
             Add Feature
+            <span
+              className="ml-2 px-1.5 py-0.5 text-[10px] font-mono rounded bg-white/10 border border-white/20"
+              data-testid="shortcut-add-feature"
+            >
+              {ACTION_SHORTCUTS.addFeature}
+            </span>
           </Button>
         </div>
       </div>

@@ -67,6 +67,6 @@
     "category": "Core",
     "description": "Add shortcuts keys to all left navigation links, then add shortcuts to the add buttons on the routes (such as kanbam add feature). mske sure they don't mess with normal input or textarea typing or typeaheads. display the shortkey in link or button for users to know (K)",
     "steps": [],
-    "status": "in_progress"
+    "status": "verified"
   }
 ]

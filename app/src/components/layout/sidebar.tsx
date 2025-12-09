@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useMemo } from "react";
 import { cn } from "@/lib/utils";
 import { useAppStore } from "@/store/app-store";
 import Link from "next/link";
@@ -30,6 +30,11 @@ import {
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
+import {
+  useKeyboardShortcuts,
+  NAV_SHORTCUTS,
+  KeyboardShortcut,
+} from "@/hooks/use-keyboard-shortcuts";
 
 interface NavSection {
   label?: string;
@@ -40,6 +45,7 @@ interface NavItem {
   id: string;
   label: string;
   icon: any;
+  shortcut?: string;
 }
 
 export function Sidebar() {
@@ -59,19 +65,51 @@ export function Sidebar() {
     {
       label: "Project",
       items: [
-        { id: "board", label: "Kanban Board", icon: LayoutGrid },
-        { id: "agent", label: "Agent Runner", icon: Bot },
+        { id: "board", label: "Kanban Board", icon: LayoutGrid, shortcut: NAV_SHORTCUTS.board },
+        { id: "agent", label: "Agent Runner", icon: Bot, shortcut: NAV_SHORTCUTS.agent },
       ],
     },
     {
       label: "Tools",
       items: [
-        { id: "spec", label: "Spec Editor", icon: FileText },
-        { id: "context", label: "Context", icon: BookOpen },
-        { id: "tools", label: "Agent Tools", icon: Wrench },
+        { id: "spec", label: "Spec Editor", icon: FileText, shortcut: NAV_SHORTCUTS.spec },
+        { id: "context", label: "Context", icon: BookOpen, shortcut: NAV_SHORTCUTS.context },
+        { id: "tools", label: "Agent Tools", icon: Wrench, shortcut: NAV_SHORTCUTS.tools },
       ],
     },
   ];
+
+  // Build keyboard shortcuts for navigation
+  const navigationShortcuts: KeyboardShortcut[] = useMemo(() => {
+    const shortcuts: KeyboardShortcut[] = [];
+
+    // Only enable nav shortcuts if there's a current project
+    if (currentProject) {
+      navSections.forEach((section) => {
+        section.items.forEach((item) => {
+          if (item.shortcut) {
+            shortcuts.push({
+              key: item.shortcut,
+              action: () => setCurrentView(item.id as any),
+              description: `Navigate to ${item.label}`,
+            });
+          }
+        });
+      });
+
+      // Add settings shortcut
+      shortcuts.push({
+        key: NAV_SHORTCUTS.settings,
+        action: () => setCurrentView("settings"),
+        description: "Navigate to Settings",
+      });
+    }
+
+    return shortcuts;
+  }, [currentProject, setCurrentView]);
+
+  // Register keyboard shortcuts
+  useKeyboardShortcuts(navigationShortcuts);
 
   const isActiveRoute = (id: string) => {
     return currentView === id;
@@ -250,12 +288,23 @@ export function Sidebar() {
                         />
                         <span
                           className={cn(
-                            "ml-2.5 font-medium text-sm",
+                            "ml-2.5 font-medium text-sm flex-1",
                             sidebarOpen ? "hidden lg:block" : "hidden"
                           )}
                         >
                           {item.label}
                         </span>
+                        {item.shortcut && sidebarOpen && (
+                          <span
+                            className={cn(
+                              "hidden lg:flex items-center justify-center w-5 h-5 text-[10px] font-mono rounded bg-white/5 border border-white/10 text-zinc-500",
+                              isActive && "bg-brand-500/10 border-brand-500/20 text-brand-400"
+                            )}
+                            data-testid={`shortcut-${item.id}`}
+                          >
+                            {item.shortcut}
+                          </span>
+                        )}
                         {/* Tooltip for collapsed state */}
                         {!sidebarOpen && (
                           <span
@@ -304,12 +353,23 @@ export function Sidebar() {
             />
             <span
               className={cn(
-                "ml-2.5 font-medium text-sm",
+                "ml-2.5 font-medium text-sm flex-1",
                 sidebarOpen ? "hidden lg:block" : "hidden"
               )}
             >
               Settings
             </span>
+            {sidebarOpen && (
+              <span
+                className={cn(
+                  "hidden lg:flex items-center justify-center w-5 h-5 text-[10px] font-mono rounded bg-white/5 border border-white/10 text-zinc-500",
+                  isActiveRoute("settings") && "bg-brand-500/10 border-brand-500/20 text-brand-400"
+                )}
+                data-testid="shortcut-settings"
+              >
+                {NAV_SHORTCUTS.settings}
+              </span>
+            )}
             {!sidebarOpen && (
               <span className="absolute left-full ml-2 px-2 py-1 bg-zinc-800 text-white text-xs rounded opacity-0 group-hover:opacity-100 transition-opacity whitespace-nowrap z-50 border border-zinc-700">
                 Settings
