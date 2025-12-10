@@ -489,6 +489,7 @@ export function Sidebar() {
           id: "profiles",
           label: "AI Profiles",
           icon: UserCircle,
+          shortcut: NAV_SHORTCUTS.profiles,
         },
       ],
     },

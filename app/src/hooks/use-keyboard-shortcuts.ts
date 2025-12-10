@@ -106,6 +106,7 @@ export const NAV_SHORTCUTS: Record<string, string> = {
   context: "C", // C for Context
   tools: "T", // T for Tools
   settings: "S", // S for Settings
+  profiles: "M", // M for Models/profiles
 };
 
 /**
@@ -127,4 +128,5 @@ export const ACTION_SHORTCUTS: Record<string, string> = {
   projectPicker: "P", // P for Project picker
   cyclePrevProject: "Q", // Q for previous project (cycle back through MRU)
   cycleNextProject: "E", // E for next project (cycle forward through MRU)
+  addProfile: "N", // N for New profile (when in profiles view)
 };

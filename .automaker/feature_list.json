@@ -330,5 +330,18 @@
     "skipTests": true,
     "model": "sonnet",
     "thinkingLevel": "medium"
+  },
+  {
+    "id": "feature-1765375218276-4sgru3lca",
+    "category": "Other",
+    "description": "I want you to add a shortcuts to ai profies in siedbar to be M and insite that view the new profile should be also shortuct to open to crate a new profile by shortcat N",
+    "steps": [],
+    "status": "verified",
+    "startedAt": "2025-12-10T14:00:32.639Z",
+    "imagePaths": [],
+    "skipTests": true,
+    "summary": "Added keyboard shortcuts for AI Profiles:\n- Press M to navigate to AI Profiles view from sidebar\n- Press N in profiles view to create new profile\n- Visual shortcut indicators added to UI\nModified: use-keyboard-shortcuts.ts (added profiles:M and addProfile:N shortcuts), sidebar.tsx (added shortcut to profiles nav item), profiles-view.tsx (imported keyboard shortcut hooks, implemented N shortcut handler, added visual indicator to New Profile button)",
+    "model": "haiku",
+    "thinkingLevel": "none"
   }
 ]

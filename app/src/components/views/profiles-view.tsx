@@ -1,12 +1,17 @@
 "use client";
 
-import { useState, useMemo, useCallback } from "react";
+import { useState, useMemo, useCallback, useEffect } from "react";
 import { useAppStore, AIProfile, AgentModel, ThinkingLevel, ModelProvider } from "@/store/app-store";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { cn, modelSupportsThinking } from "@/lib/utils";
+import {
+  useKeyboardShortcuts,
+  ACTION_SHORTCUTS,
+  KeyboardShortcut,
+} from "@/hooks/use-keyboard-shortcuts";
 import {
   Dialog,
   DialogContent,
@@ -501,6 +506,23 @@ export function ProfilesView() {
     });
   };
 
+  // Build keyboard shortcuts for profiles view
+  const profilesShortcuts: KeyboardShortcut[] = useMemo(() => {
+    const shortcuts: KeyboardShortcut[] = [];
+
+    // Add profile shortcut - when in profiles view
+    shortcuts.push({
+      key: ACTION_SHORTCUTS.addProfile,
+      action: () => setShowAddDialog(true),
+      description: "Create new profile",
+    });
+
+    return shortcuts;
+  }, []);
+
+  // Register keyboard shortcuts for profiles view
+  useKeyboardShortcuts(profilesShortcuts);
+
   return (
     <div
       className="flex-1 flex flex-col overflow-hidden content-bg"
@@ -523,9 +545,12 @@ export function ProfilesView() {
                 </p>
               </div>
             </div>
-            <Button onClick={() => setShowAddDialog(true)} data-testid="add-profile-button">
+            <Button onClick={() => setShowAddDialog(true)} data-testid="add-profile-button" className="relative">
               <Plus className="w-4 h-4 mr-2" />
               New Profile
+              <span className="hidden lg:flex items-center justify-center ml-2 px-2 py-0.5 text-[10px] font-mono rounded bg-white/5 border border-white/10 text-zinc-500">
+                {ACTION_SHORTCUTS.addProfile}
+              </span>
             </Button>
           </div>
         </div>
