@@ -483,21 +483,54 @@ export const KanbanCard = memo(function KanbanCard({
         )}
       >
         {isCurrentAutoTask && (
-          <div className="absolute top-2 right-2 flex items-center justify-center gap-2 bg-[var(--status-in-progress)]/15 border border-[var(--status-in-progress)]/50 rounded-md px-2 py-0.5">
-            <Loader2 className="w-3.5 h-3.5 text-[var(--status-in-progress)] animate-spin" />
-            <span className="text-[10px] text-[var(--status-in-progress)] font-medium">
-              {formatModelName(feature.model ?? DEFAULT_MODEL)}
-            </span>
-            {feature.startedAt && (
-              <CountUpTimer
-                startedAt={feature.startedAt}
-                className="text-[var(--status-in-progress)] text-[10px]"
-              />
-            )}
+          <div className="absolute top-2 right-2 flex items-center gap-1">
+            <div className="flex items-center justify-center gap-2 bg-[var(--status-in-progress)]/15 border border-[var(--status-in-progress)]/50 rounded-md px-2 py-0.5">
+              <Loader2 className="w-3.5 h-3.5 text-[var(--status-in-progress)] animate-spin" />
+              {feature.startedAt && (
+                <CountUpTimer
+                  startedAt={feature.startedAt}
+                  className="text-[var(--status-in-progress)] text-[10px]"
+                />
+              )}
+            </div>
+            <DropdownMenu>
+              <DropdownMenuTrigger asChild>
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  className="h-6 w-6 p-0 hover:bg-muted/80 rounded-md"
+                  onClick={(e) => e.stopPropagation()}
+                  onPointerDown={(e) => e.stopPropagation()}
+                  data-testid={`menu-running-${feature.id}`}
+                >
+                  <MoreVertical className="w-3.5 h-3.5 text-muted-foreground" />
+                </Button>
+              </DropdownMenuTrigger>
+              <DropdownMenuContent align="end" className="w-36">
+                <DropdownMenuItem
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    onEdit();
+                  }}
+                  data-testid={`edit-running-${feature.id}`}
+                  className="text-xs"
+                >
+                  <Edit className="w-3 h-3 mr-2" />
+                  Edit
+                </DropdownMenuItem>
+                {/* Model info in dropdown */}
+                <div className="px-2 py-1.5 text-[10px] text-muted-foreground border-t mt-1 pt-1.5">
+                  <div className="flex items-center gap-1">
+                    <Cpu className="w-3 h-3" />
+                    <span>{formatModelName(feature.model ?? DEFAULT_MODEL)}</span>
+                  </div>
+                </div>
+              </DropdownMenuContent>
+            </DropdownMenu>
           </div>
         )}
         {!isCurrentAutoTask && feature.status === "backlog" && (
-          <div className="absolute bottom-1 right-2">
+          <div className="absolute top-2 right-2">
             <Button
               variant="ghost"
               size="sm"
@@ -554,8 +587,6 @@ export const KanbanCard = memo(function KanbanCard({
                     <FileText className="w-4 h-4" />
                   </Button>
                 )}
-              </div>
-              <div className="absolute bottom-1 right-2">
                 <Button
                   variant="ghost"
                   size="sm"
@@ -577,7 +608,21 @@ export const KanbanCard = memo(function KanbanCard({
           )}
         {!isCurrentAutoTask && feature.status === "in_progress" && (
           <>
-            <div className="absolute top-2 right-2">
+            <div className="absolute top-2 right-2 flex items-center gap-1">
+              <Button
+                variant="ghost"
+                size="sm"
+                className="h-6 w-6 p-0 hover:bg-white/10 text-muted-foreground hover:text-destructive"
+                onClick={(e) => {
+                  e.stopPropagation();
+                  handleDeleteClick(e);
+                }}
+                onPointerDown={(e) => e.stopPropagation()}
+                data-testid={`delete-feature-${feature.id}`}
+                title="Delete"
+              >
+                <Trash2 className="w-4 h-4" />
+              </Button>
               <DropdownMenu>
                 <DropdownMenuTrigger asChild>
                   <Button
@@ -616,24 +661,15 @@ export const KanbanCard = memo(function KanbanCard({
                       View Logs
                     </DropdownMenuItem>
                   )}
+                  {/* Model info in dropdown */}
+                  <div className="px-2 py-1.5 text-[10px] text-muted-foreground border-t mt-1 pt-1.5">
+                    <div className="flex items-center gap-1">
+                      <Cpu className="w-3 h-3" />
+                      <span>{formatModelName(feature.model ?? DEFAULT_MODEL)}</span>
+                    </div>
+                  </div>
                 </DropdownMenuContent>
               </DropdownMenu>
-            </div>
-            <div className="absolute bottom-1 right-2">
-              <Button
-                variant="ghost"
-                size="sm"
-                className="h-6 w-6 p-0 hover:bg-white/10 text-muted-foreground hover:text-destructive"
-                onClick={(e) => {
-                  e.stopPropagation();
-                  handleDeleteClick(e);
-                }}
-                onPointerDown={(e) => e.stopPropagation()}
-                data-testid={`delete-feature-${feature.id}`}
-                title="Delete"
-              >
-                <Trash2 className="w-4 h-4" />
-              </Button>
             </div>
           </>
         )}
