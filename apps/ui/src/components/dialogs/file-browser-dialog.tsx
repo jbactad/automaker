@@ -10,6 +10,7 @@ import {
 } from '@/components/ui/dialog';
 import { Button } from '@/components/ui/button';
 import { PathInput } from '@/components/ui/path-input';
+import { Kbd, KbdGroup } from '@/components/ui/kbd';
 import { getJSON, setJSON } from '@/lib/storage';
 import { getDefaultWorkspaceDirectory, saveLastProjectDirectory } from '@/lib/workspace-config';
 
@@ -232,7 +233,7 @@ export function FileBrowserDialog({
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="bg-popover border-border max-w-3xl max-h-[85vh] overflow-hidden flex flex-col p-4">
+      <DialogContent className="bg-popover border-border max-w-3xl max-h-[85vh] overflow-hidden flex flex-col p-4 focus:outline-none focus-visible:outline-none">
         <DialogHeader className="pb-1">
           <DialogTitle className="flex items-center gap-2 text-base">
             <FolderOpen className="w-4 h-4 text-brand-500" />
@@ -252,6 +253,12 @@ export function FileBrowserDialog({
             error={!!error}
             onNavigate={handleNavigate}
             onHome={handleGoHome}
+            entries={directories.map((dir) => ({ ...dir, isDirectory: true }))}
+            onSelectEntry={(entry) => {
+              if (entry.isDirectory) {
+                handleSelectDirectory(entry);
+              }
+            }}
           />
 
           {/* Recent folders */}
@@ -366,12 +373,14 @@ export function FileBrowserDialog({
           >
             <FolderOpen className="w-3.5 h-3.5 mr-1.5" />
             Select Current Folder
-            <kbd className="ml-2 px-1.5 py-0.5 text-[10px] bg-background/50 rounded border border-border">
-              {typeof navigator !== 'undefined' && navigator.platform?.includes('Mac')
-                ? '⌘'
-                : 'Ctrl'}
-              +↵
-            </kbd>
+            <KbdGroup className="ml-1">
+              <Kbd>
+                {typeof navigator !== 'undefined' && navigator.platform?.includes('Mac')
+                  ? '⌘'
+                  : 'Ctrl'}
+              </Kbd>
+              <Kbd>↵</Kbd>
+            </KbdGroup>
           </Button>
         </DialogFooter>
       </DialogContent>
