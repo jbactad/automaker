@@ -859,6 +859,7 @@ export interface AppActions {
 
 // Default built-in AI profiles
 const DEFAULT_AI_PROFILES: AIProfile[] = [
+  // Claude profiles
   {
     id: 'profile-heavy-task',
     name: 'Heavy Task',
@@ -889,6 +890,34 @@ const DEFAULT_AI_PROFILES: AIProfile[] = [
     provider: 'claude',
     isBuiltIn: true,
     icon: 'Zap',
+  },
+  // Cursor profiles
+  {
+    id: 'profile-cursor-auto',
+    name: 'Cursor Auto',
+    description: 'Let Cursor choose the best model automatically.',
+    provider: 'cursor',
+    cursorModel: 'auto',
+    isBuiltIn: true,
+    icon: 'Sparkles',
+  },
+  {
+    id: 'profile-cursor-fast',
+    name: 'Cursor Fast',
+    description: 'Quick responses with GPT-4o Mini via Cursor.',
+    provider: 'cursor',
+    cursorModel: 'gpt-4o-mini',
+    isBuiltIn: true,
+    icon: 'Zap',
+  },
+  {
+    id: 'profile-cursor-thinking',
+    name: 'Cursor Thinking',
+    description: 'Claude Sonnet 4 with extended thinking via Cursor for complex tasks.',
+    provider: 'cursor',
+    cursorModel: 'claude-sonnet-4-thinking',
+    isBuiltIn: true,
+    icon: 'Brain',
   },
 ];
 

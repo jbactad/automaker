@@ -1,6 +1,6 @@
 # Phase 8: AI Profiles Integration
 
-**Status:** `pending`
+**Status:** `completed`
 **Dependencies:** Phase 1 (Types), Phase 7 (Settings)
 **Estimated Effort:** Medium (UI + types)
 
@@ -31,7 +31,7 @@ Extend the AI Profiles system to support Cursor as a provider, with proper handl
 
 ### Task 8.1: Update AIProfile Type
 
-**Status:** `pending`
+**Status:** `completed`
 
 **File:** `libs/types/src/settings.ts`
 
@@ -93,7 +93,7 @@ export function getProfileModelString(profile: AIProfile): string {
 
 ### Task 8.2: Update Profile Form Component
 
-**Status:** `pending`
+**Status:** `completed`
 
 **File:** `apps/ui/src/components/views/profiles-view/components/profile-form.tsx`
 
@@ -289,7 +289,7 @@ export function ProfileForm({ profile, onSave, onCancel }: ProfileFormProps) {
 
 ### Task 8.3: Update Profile Card Display
 
-**Status:** `pending`
+**Status:** `completed`
 
 **File:** `apps/ui/src/components/views/profiles-view/components/profile-card.tsx`
 
@@ -374,7 +374,7 @@ export function ProfileCard({ profile, onEdit, onDelete }: ProfileCardProps) {
 
 ### Task 8.4: Add Default Cursor Profiles
 
-**Status:** `pending`
+**Status:** `completed`
 
 **File:** `apps/ui/src/components/views/profiles-view/constants.ts`
 
@@ -430,7 +430,7 @@ export const DEFAULT_PROFILES: AIProfile[] = [
 
 ### Task 8.5: Update Profile Validation
 
-**Status:** `pending`
+**Status:** `completed`
 
 Add validation for profile data:
 

@@ -1,8 +1,34 @@
 import { Label } from '@/components/ui/label';
 import { Brain, UserCircle } from 'lucide-react';
 import { cn } from '@/lib/utils';
-import { AgentModel, ThinkingLevel, AIProfile } from '@/store/app-store';
+import type { AgentModel, ThinkingLevel, AIProfile } from '@automaker/types';
+import { CURSOR_MODEL_MAP, profileHasThinking } from '@automaker/types';
 import { PROFILE_ICONS } from './model-constants';
+
+/**
+ * Get display string for a profile's model configuration
+ */
+function getProfileModelDisplay(profile: AIProfile): string {
+  if (profile.provider === 'cursor') {
+    const cursorModel = profile.cursorModel || 'auto';
+    const modelConfig = CURSOR_MODEL_MAP[cursorModel];
+    return modelConfig?.label || cursorModel;
+  }
+  // Claude
+  return profile.model || 'sonnet';
+}
+
+/**
+ * Get display string for a profile's thinking configuration
+ */
+function getProfileThinkingDisplay(profile: AIProfile): string | null {
+  if (profile.provider === 'cursor') {
+    // For Cursor, thinking is embedded in the model
+    return profileHasThinking(profile) ? 'thinking' : null;
+  }
+  // Claude
+  return profile.thinkingLevel && profile.thinkingLevel !== 'none' ? profile.thinkingLevel : null;
+}
 
 interface ProfileQuickSelectProps {
   profiles: AIProfile[];
@@ -23,7 +49,11 @@ export function ProfileQuickSelect({
   showManageLink = false,
   onManageLinkClick,
 }: ProfileQuickSelectProps) {
-  if (profiles.length === 0) {
+  // Filter to only Claude profiles for now - Cursor profiles will be supported
+  // when features support provider selection (Phase 9)
+  const claudeProfiles = profiles.filter((p) => p.provider === 'claude');
+
+  if (claudeProfiles.length === 0) {
     return null;
   }
 
@@ -39,7 +69,7 @@ export function ProfileQuickSelect({
         </span>
       </div>
       <div className="grid grid-cols-2 gap-2">
-        {profiles.slice(0, 6).map((profile) => {
+        {claudeProfiles.slice(0, 6).map((profile) => {
           const IconComponent = profile.icon ? PROFILE_ICONS[profile.icon] : Brain;
           const isSelected =
             selectedModel === profile.model && selectedThinkingLevel === profile.thinkingLevel;
@@ -47,7 +77,7 @@ export function ProfileQuickSelect({
             <button
               key={profile.id}
               type="button"
-              onClick={() => onSelect(profile.model, profile.thinkingLevel)}
+              onClick={() => onSelect(profile.model!, profile.thinkingLevel!)}
               className={cn(
                 'flex items-center gap-2 p-2 rounded-lg border text-left transition-all',
                 isSelected
@@ -62,8 +92,8 @@ export function ProfileQuickSelect({
               <div className="min-w-0 flex-1">
                 <p className="text-sm font-medium truncate">{profile.name}</p>
                 <p className="text-[10px] text-muted-foreground truncate">
-                  {profile.model}
-                  {profile.thinkingLevel !== 'none' && ` + ${profile.thinkingLevel}`}
+                  {getProfileModelDisplay(profile)}
+                  {getProfileThinkingDisplay(profile) && ` + ${getProfileThinkingDisplay(profile)}`}
                 </p>
               </div>
             </button>

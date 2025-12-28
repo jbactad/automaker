@@ -71,6 +71,8 @@ export {
   SETTINGS_VERSION,
   CREDENTIALS_VERSION,
   PROJECT_SETTINGS_VERSION,
+  profileHasThinking,
+  getProfileModelString,
 } from './settings.js';
 
 // Model display constants

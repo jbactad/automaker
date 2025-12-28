@@ -7,6 +7,8 @@
  */
 
 import type { AgentModel } from './model.js';
+import type { CursorModelId } from './cursor-models.js';
+import { CURSOR_MODEL_MAP } from './cursor-models.js';
 
 // Re-export AgentModel for convenience
 export type { AgentModel };
@@ -151,16 +153,54 @@ export interface AIProfile {
   name: string;
   /** User-friendly description */
   description: string;
-  /** Which Claude model to use (opus, sonnet, haiku) */
-  model: AgentModel;
-  /** Extended thinking level for reasoning-based tasks */
-  thinkingLevel: ThinkingLevel;
-  /** Provider (currently only "claude") */
+  /** Provider selection: 'claude' or 'cursor' */
   provider: ModelProvider;
   /** Whether this is a built-in default profile */
   isBuiltIn: boolean;
   /** Optional icon identifier or emoji */
   icon?: string;
+
+  // Claude-specific settings
+  /** Which Claude model to use (opus, sonnet, haiku) - only for Claude provider */
+  model?: AgentModel;
+  /** Extended thinking level for reasoning-based tasks - only for Claude provider */
+  thinkingLevel?: ThinkingLevel;
+
+  // Cursor-specific settings
+  /** Which Cursor model to use - only for Cursor provider
+   * Note: For Cursor, thinking is embedded in the model ID (e.g., 'claude-sonnet-4-thinking')
+   */
+  cursorModel?: CursorModelId;
+}
+
+/**
+ * Helper to determine if a profile uses thinking mode
+ */
+export function profileHasThinking(profile: AIProfile): boolean {
+  if (profile.provider === 'claude') {
+    return profile.thinkingLevel !== undefined && profile.thinkingLevel !== 'none';
+  }
+
+  if (profile.provider === 'cursor') {
+    const model = profile.cursorModel || 'auto';
+    // Check using model map for hasThinking flag, or check for 'thinking' in name
+    const modelConfig = CURSOR_MODEL_MAP[model];
+    return modelConfig?.hasThinking ?? false;
+  }
+
+  return false;
+}
+
+/**
+ * Get effective model string for execution
+ */
+export function getProfileModelString(profile: AIProfile): string {
+  if (profile.provider === 'cursor') {
+    return `cursor:${profile.cursorModel || 'auto'}`;
+  }
+
+  // Claude
+  return profile.model || 'sonnet';
 }
 
 /**
