@@ -29,6 +29,8 @@ import type {
   ContentBlock,
 } from './types.js';
 import { stripProviderPrefix } from '@automaker/types';
+import { validateApiKey } from '../lib/auth-utils.js';
+import { getEffectivePermissions } from '../services/cursor-config-service.js';
 import {
   type CursorStreamEvent,
   type CursorSystemEvent,
@@ -684,6 +686,9 @@ export class CursorProvider extends CliProvider {
 
     logger.debug(`CursorProvider.executeQuery called with model: "${options.model}"`);
 
+    // Get effective permissions for this project
+    const effectivePermissions = await getEffectivePermissions(options.cwd || process.cwd());
+
     // Debug: log raw events when AUTOMAKER_DEBUG_RAW_OUTPUT is enabled
     const debugRawEvents =
       process.env.AUTOMAKER_DEBUG_RAW_OUTPUT === 'true' ||
@@ -906,8 +911,13 @@ export class CursorProvider extends CliProvider {
       return { authenticated: false, method: 'none' };
     }
 
-    // Check for API key in environment
+    // Check for API key in environment with validation
     if (process.env.CURSOR_API_KEY) {
+      const validation = validateApiKey(process.env.CURSOR_API_KEY, 'cursor');
+      if (!validation.isValid) {
+        logger.warn('Cursor API key validation failed:', validation.error);
+        return { authenticated: false, method: 'api_key', error: validation.error };
+      }
       return { authenticated: true, method: 'api_key' };
     }
 

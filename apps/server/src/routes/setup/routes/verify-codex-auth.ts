@@ -8,8 +8,16 @@ import { CODEX_MODEL_MAP } from '@automaker/types';
 import { ProviderFactory } from '../../../providers/provider-factory.js';
 import { getApiKey } from '../common.js';
 import { getCodexAuthIndicators } from '@automaker/platform';
+import {
+  createSecureAuthEnv,
+  AuthSessionManager,
+  AuthRateLimiter,
+  validateApiKey,
+  createTempEnvOverride,
+} from '../../../lib/auth-utils.js';
 
 const logger = createLogger('Setup');
+const rateLimiter = new AuthRateLimiter();
 const OPENAI_API_KEY_ENV = 'OPENAI_API_KEY';
 const AUTH_PROMPT = "Reply with only the word 'ok'";
 const AUTH_TIMEOUT_MS = 30000;
@@ -75,138 +83,169 @@ function isRateLimitError(text: string): boolean {
 export function createVerifyCodexAuthHandler() {
   return async (req: Request, res: Response): Promise<void> => {
     const { authMethod } = req.body as { authMethod?: 'cli' | 'api_key' };
+
+    // Create session ID for cleanup
+    const sessionId = `codex-auth-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`;
+
+    // Rate limiting
+    const clientIp = req.ip || req.socket.remoteAddress || 'unknown';
+    if (!rateLimiter.canAttempt(clientIp)) {
+      const resetTime = rateLimiter.getResetTime(clientIp);
+      res.status(429).json({
+        success: false,
+        authenticated: false,
+        error: 'Too many authentication attempts. Please try again later.',
+        resetTime,
+      });
+      return;
+    }
+
     const abortController = new AbortController();
     const timeoutId = setTimeout(() => abortController.abort(), AUTH_TIMEOUT_MS);
 
-    const originalKey = process.env[OPENAI_API_KEY_ENV];
-
     try {
-      if (authMethod === 'cli') {
-        delete process.env[OPENAI_API_KEY_ENV];
-      } else if (authMethod === 'api_key') {
+      // Create secure environment without modifying process.env
+      const authEnv = createSecureAuthEnv(authMethod || 'api_key', undefined, 'openai');
+
+      // For API key auth, use stored key
+      if (authMethod === 'api_key') {
         const storedApiKey = getApiKey('openai');
         if (storedApiKey) {
-          process.env[OPENAI_API_KEY_ENV] = storedApiKey;
-        } else if (!process.env[OPENAI_API_KEY_ENV]) {
+          const validation = validateApiKey(storedApiKey, 'openai');
+          if (!validation.isValid) {
+            res.json({ success: true, authenticated: false, error: validation.error });
+            return;
+          }
+          authEnv[OPENAI_API_KEY_ENV] = validation.normalizedKey;
+        } else if (!authEnv[OPENAI_API_KEY_ENV]) {
           res.json({ success: true, authenticated: false, error: ERROR_API_KEY_REQUIRED });
           return;
         }
       }
 
-      if (authMethod === 'cli') {
-        const authIndicators = await getCodexAuthIndicators();
-        if (!authIndicators.hasOAuthToken && !authIndicators.hasApiKey) {
-          res.json({
-            success: true,
-            authenticated: false,
-            error: ERROR_CLI_AUTH_REQUIRED,
-          });
-          return;
-        }
-      }
+      // Create session and temporary environment override
+      AuthSessionManager.createSession(sessionId, authMethod || 'api_key', undefined, 'openai');
+      const cleanupEnv = createTempEnvOverride(authEnv);
 
-      // Use Codex provider explicitly (not ProviderFactory.getProviderForModel)
-      // because Cursor also supports GPT models and has higher priority
-      const provider = ProviderFactory.getProviderByName('codex');
-      if (!provider) {
-        throw new Error('Codex provider not available');
-      }
-      const stream = provider.executeQuery({
-        prompt: AUTH_PROMPT,
-        model: CODEX_MODEL_MAP.gpt52Codex,
-        cwd: process.cwd(),
-        maxTurns: 1,
-        allowedTools: [],
-        abortController,
-      });
-
-      let receivedAnyContent = false;
-      let errorMessage = '';
-
-      for await (const msg of stream) {
-        if (msg.type === 'error' && msg.error) {
-          if (isBillingError(msg.error)) {
-            errorMessage = ERROR_BILLING_MESSAGE;
-          } else if (isRateLimitError(msg.error)) {
-            errorMessage = ERROR_RATE_LIMIT_MESSAGE;
-          } else {
-            errorMessage = msg.error;
+      try {
+        if (authMethod === 'cli') {
+          const authIndicators = await getCodexAuthIndicators();
+          if (!authIndicators.hasOAuthToken && !authIndicators.hasApiKey) {
+            res.json({
+              success: true,
+              authenticated: false,
+              error: ERROR_CLI_AUTH_REQUIRED,
+            });
+            return;
           }
-          break;
         }
 
-        if (msg.type === 'assistant' && msg.message?.content) {
-          for (const block of msg.message.content) {
-            if (block.type === 'text' && block.text) {
-              receivedAnyContent = true;
-              if (isBillingError(block.text)) {
-                errorMessage = ERROR_BILLING_MESSAGE;
-                break;
+        // Use Codex provider explicitly (not ProviderFactory.getProviderForModel)
+        // because Cursor also supports GPT models and has higher priority
+        const provider = ProviderFactory.getProviderByName('codex');
+        if (!provider) {
+          throw new Error('Codex provider not available');
+        }
+        const stream = provider.executeQuery({
+          prompt: AUTH_PROMPT,
+          model: CODEX_MODEL_MAP.gpt52Codex,
+          cwd: process.cwd(),
+          maxTurns: 1,
+          allowedTools: [],
+          abortController,
+        });
+
+        let receivedAnyContent = false;
+        let errorMessage = '';
+
+        for await (const msg of stream) {
+          if (msg.type === 'error' && msg.error) {
+            if (isBillingError(msg.error)) {
+              errorMessage = ERROR_BILLING_MESSAGE;
+            } else if (isRateLimitError(msg.error)) {
+              errorMessage = ERROR_RATE_LIMIT_MESSAGE;
+            } else {
+              errorMessage = msg.error;
+            }
+            break;
+          }
+
+          if (msg.type === 'assistant' && msg.message?.content) {
+            for (const block of msg.message.content) {
+              if (block.type === 'text' && block.text) {
+                receivedAnyContent = true;
+                if (isBillingError(block.text)) {
+                  errorMessage = ERROR_BILLING_MESSAGE;
+                  break;
+                }
+                if (isRateLimitError(block.text)) {
+                  errorMessage = ERROR_RATE_LIMIT_MESSAGE;
+                  break;
+                }
+                if (containsAuthError(block.text)) {
+                  errorMessage = block.text;
+                  break;
+                }
               }
-              if (isRateLimitError(block.text)) {
-                errorMessage = ERROR_RATE_LIMIT_MESSAGE;
-                break;
-              }
-              if (containsAuthError(block.text)) {
-                errorMessage = block.text;
-                break;
-              }
+            }
+          }
+
+          if (msg.type === 'result' && msg.result) {
+            receivedAnyContent = true;
+            if (isBillingError(msg.result)) {
+              errorMessage = ERROR_BILLING_MESSAGE;
+            } else if (isRateLimitError(msg.result)) {
+              errorMessage = ERROR_RATE_LIMIT_MESSAGE;
+            } else if (containsAuthError(msg.result)) {
+              errorMessage = msg.result;
+              break;
             }
           }
         }
 
-        if (msg.type === 'result' && msg.result) {
-          receivedAnyContent = true;
-          if (isBillingError(msg.result)) {
-            errorMessage = ERROR_BILLING_MESSAGE;
-          } else if (isRateLimitError(msg.result)) {
-            errorMessage = ERROR_RATE_LIMIT_MESSAGE;
-          } else if (containsAuthError(msg.result)) {
-            errorMessage = msg.result;
-            break;
+        if (errorMessage) {
+          // Rate limit and billing errors mean auth succeeded but usage is limited
+          const isUsageLimitError =
+            errorMessage === ERROR_BILLING_MESSAGE || errorMessage === ERROR_RATE_LIMIT_MESSAGE;
+
+          const response: {
+            success: boolean;
+            authenticated: boolean;
+            error: string;
+            details?: string;
+          } = {
+            success: true,
+            authenticated: isUsageLimitError ? true : false,
+            error: isUsageLimitError
+              ? errorMessage
+              : authMethod === 'cli'
+                ? ERROR_CLI_AUTH_REQUIRED
+                : 'API key is invalid or has been revoked.',
+          };
+
+          // Include detailed error for auth failures so users can debug
+          if (!isUsageLimitError && errorMessage !== response.error) {
+            response.details = errorMessage;
           }
-        }
-      }
 
-      if (errorMessage) {
-        // Rate limit and billing errors mean auth succeeded but usage is limited
-        const isUsageLimitError =
-          errorMessage === ERROR_BILLING_MESSAGE || errorMessage === ERROR_RATE_LIMIT_MESSAGE;
-
-        const response: {
-          success: boolean;
-          authenticated: boolean;
-          error: string;
-          details?: string;
-        } = {
-          success: true,
-          authenticated: isUsageLimitError ? true : false,
-          error: isUsageLimitError
-            ? errorMessage
-            : authMethod === 'cli'
-              ? ERROR_CLI_AUTH_REQUIRED
-              : 'API key is invalid or has been revoked.',
-        };
-
-        // Include detailed error for auth failures so users can debug
-        if (!isUsageLimitError && errorMessage !== response.error) {
-          response.details = errorMessage;
+          res.json(response);
+          return;
         }
 
-        res.json(response);
-        return;
-      }
+        if (!receivedAnyContent) {
+          res.json({
+            success: true,
+            authenticated: false,
+            error: 'No response received from Codex. Please check your authentication.',
+          });
+          return;
+        }
 
-      if (!receivedAnyContent) {
-        res.json({
-          success: true,
-          authenticated: false,
-          error: 'No response received from Codex. Please check your authentication.',
-        });
-        return;
+        res.json({ success: true, authenticated: true });
+      } finally {
+        // Clean up environment override
+        cleanupEnv();
       }
-
-      res.json({ success: true, authenticated: true });
     } catch (error: unknown) {
       const errMessage = error instanceof Error ? error.message : String(error);
       logger.error('[Setup] Codex auth verification error:', errMessage);
@@ -222,11 +261,8 @@ export function createVerifyCodexAuthHandler() {
       });
     } finally {
       clearTimeout(timeoutId);
-      if (originalKey !== undefined) {
-        process.env[OPENAI_API_KEY_ENV] = originalKey;
-      } else {
-        delete process.env[OPENAI_API_KEY_ENV];
-      }
+      // Clean up session
+      AuthSessionManager.destroySession(sessionId);
     }
   };
 }
