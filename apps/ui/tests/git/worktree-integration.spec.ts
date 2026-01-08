@@ -14,7 +14,6 @@ import {
   setupProjectWithPath,
   waitForBoardView,
   authenticateForTests,
-  handleLoginScreenIfPresent,
 } from '../utils';
 
 const TEST_TEMP_DIR = createTempDirPath('worktree-tests');
@@ -55,10 +54,16 @@ test.describe('Worktree Integration', () => {
     await waitForNetworkIdle(page);
     await waitForBoardView(page);
 
+    // Wait for the worktree selector to appear (indicates API call completed)
     const branchLabel = page.getByText('Branch:');
     await expect(branchLabel).toBeVisible({ timeout: 10000 });
 
+    // Wait for the main branch button to appear
+    // This ensures the worktree API has returned data with the main branch
     const mainBranchButton = page.locator('[data-testid="worktree-branch-main"]');
     await expect(mainBranchButton).toBeVisible({ timeout: 15000 });
+
+    // Verify the branch name is displayed
+    await expect(mainBranchButton).toContainText('main');
   });
 });

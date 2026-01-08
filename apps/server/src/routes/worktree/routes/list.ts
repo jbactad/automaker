@@ -74,8 +74,23 @@ export function createListHandler() {
         } else if (line.startsWith('branch ')) {
           current.branch = line.slice(7).replace('refs/heads/', '');
         } else if (line === '') {
-          if (current.path && current.branch) {
+          if (current.path) {
             const isMainWorktree = isFirst;
+
+            // If branch is missing (can happen for main worktree in some git states),
+            // fall back to getCurrentBranch() for the main worktree
+            let branchName = current.branch;
+            if (!branchName && isMainWorktree) {
+              // For main worktree, use the current branch we already fetched
+              branchName = currentBranch || '';
+            }
+
+            // Skip if we still don't have a branch name (shouldn't happen, but be safe)
+            if (!branchName) {
+              current = {};
+              continue;
+            }
+
             // Check if the worktree directory actually exists
             // Skip checking/pruning the main worktree (projectPath itself)
             let worktreeExists = false;
@@ -89,21 +104,63 @@ export function createListHandler() {
               // Worktree directory doesn't exist - it was manually deleted
               removedWorktrees.push({
                 path: current.path,
-                branch: current.branch,
+                branch: branchName,
               });
             } else {
               // Worktree exists (or is main worktree), add it to the list
               worktrees.push({
                 path: current.path,
-                branch: current.branch,
+                branch: branchName,
                 isMain: isMainWorktree,
-                isCurrent: current.branch === currentBranch,
+                isCurrent: branchName === currentBranch,
                 hasWorktree: true,
               });
               isFirst = false;
             }
           }
           current = {};
+        }
+      }
+
+      // Handle the last worktree entry if output doesn't end with blank line
+      if (current.path) {
+        const isMainWorktree = isFirst;
+
+        // If branch is missing (can happen for main worktree in some git states),
+        // fall back to getCurrentBranch() for the main worktree
+        let branchName = current.branch;
+        if (!branchName && isMainWorktree) {
+          // For main worktree, use the current branch we already fetched
+          branchName = currentBranch || '';
+        }
+
+        // Only add if we have a branch name
+        if (branchName) {
+          // Check if the worktree directory actually exists
+          // Skip checking/pruning the main worktree (projectPath itself)
+          let worktreeExists = false;
+          try {
+            await secureFs.access(current.path);
+            worktreeExists = true;
+          } catch {
+            worktreeExists = false;
+          }
+          if (!isMainWorktree && !worktreeExists) {
+            // Worktree directory doesn't exist - it was manually deleted
+            removedWorktrees.push({
+              path: current.path,
+              branch: branchName,
+            });
+          } else {
+            // Worktree exists (or is main worktree), add it to the list
+            worktrees.push({
+              path: current.path,
+              branch: branchName,
+              isMain: isMainWorktree,
+              isCurrent: branchName === currentBranch,
+              hasWorktree: true,
+            });
+          }
         }
       }
 
