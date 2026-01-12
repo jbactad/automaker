@@ -109,7 +109,7 @@ describe('opencode-provider.ts', () => {
 
       const parseModelsOutput = (
         provider as unknown as { parseModelsOutput: (output: string) => ModelDefinition[] }
-      ).parseModelsOutput;
+      ).parseModelsOutput.bind(provider);
       const models = parseModelsOutput(output);
 
       expect(models).toHaveLength(2);
