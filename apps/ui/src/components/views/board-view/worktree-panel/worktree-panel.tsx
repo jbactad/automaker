@@ -5,6 +5,7 @@ import { cn, pathsEqual } from '@/lib/utils';
 import { toast } from 'sonner';
 import { getHttpApiClient } from '@/lib/http-api-client';
 import { useIsMobile } from '@/hooks/use-media-query';
+import { useWorktreeInitScript } from '@/hooks/queries';
 import type { WorktreePanelProps, WorktreeInfo } from './types';
 import {
   useWorktrees,
@@ -79,41 +80,20 @@ export function WorktreePanel({
     handlePull,
     handlePush,
     handleOpenInEditor,
-  } = useWorktreeActions({
-    fetchWorktrees,
-    fetchBranches,
-  });
+  } = useWorktreeActions();
 
   const { hasRunningFeatures } = useRunningFeatures({
     runningFeatureIds,
     features,
   });
 
-  // Track whether init script exists for the project
-  const [hasInitScript, setHasInitScript] = useState(false);
+  // Check if init script exists for the project using React Query
+  const { data: initScriptData } = useWorktreeInitScript(projectPath);
+  const hasInitScript = initScriptData?.exists ?? false;
 
   // Log panel state management
   const [logPanelOpen, setLogPanelOpen] = useState(false);
   const [logPanelWorktree, setLogPanelWorktree] = useState<WorktreeInfo | null>(null);
-
-  useEffect(() => {
-    if (!projectPath) {
-      setHasInitScript(false);
-      return;
-    }
-
-    const checkInitScript = async () => {
-      try {
-        const api = getHttpApiClient();
-        const result = await api.worktree.getInitScript(projectPath);
-        setHasInitScript(result.success && result.exists);
-      } catch {
-        setHasInitScript(false);
-      }
-    };
-
-    checkInitScript();
-  }, [projectPath]);
 
   const isMobile = useIsMobile();
 
