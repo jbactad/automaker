@@ -62,13 +62,6 @@
     ]
   },
   "dependencies": {
-    "@fontsource/cascadia-code": "^5.2.3",
-    "@fontsource/iosevka": "^5.2.5",
-    "@fontsource/lato": "^5.2.7",
-    "@fontsource/montserrat": "^5.2.8",
-    "@fontsource/playfair-display": "^5.2.8",
-    "@fontsource/raleway": "^5.2.8",
-    "@fontsource/source-sans-3": "^5.2.9",
     "cross-spawn": "7.0.6",
     "rehype-sanitize": "6.0.0",
     "tree-kill": "1.2.2"

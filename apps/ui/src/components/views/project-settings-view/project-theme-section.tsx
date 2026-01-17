@@ -43,40 +43,28 @@ export function ProjectThemeSection({ project }: ProjectThemeSectionProps) {
   const [activeTab, setActiveTab] = useState<'dark' | 'light'>(isLightTheme ? 'light' : 'dark');
 
   // Helper to validate fonts against available options
-  const isValidSansFont = (font: string | undefined): boolean => {
-    if (!font) return false;
-    return UI_SANS_FONT_OPTIONS.some((opt) => opt.value === font);
-  };
-  const isValidMonoFont = (font: string | undefined): boolean => {
-    if (!font) return false;
-    return UI_MONO_FONT_OPTIONS.some((opt) => opt.value === font);
-  };
+  const isValidSansFont = (font?: string): boolean =>
+    !!font && UI_SANS_FONT_OPTIONS.some((opt) => opt.value === font);
+  const isValidMonoFont = (font?: string): boolean =>
+    !!font && UI_MONO_FONT_OPTIONS.some((opt) => opt.value === font);
+
+  // Helper to get initial font value with validation
+  const getInitialFontValue = (font: string | undefined, validator: (f?: string) => boolean) =>
+    font && validator(font) ? font : DEFAULT_FONT_VALUE;
 
   // Font local state - tracks what's selected when using custom fonts
   // Falls back to default if stored font is not in available options
-  const [fontSansLocal, setFontSansLocal] = useState<string>(
-    project.fontFamilySans && isValidSansFont(project.fontFamilySans)
-      ? project.fontFamilySans
-      : DEFAULT_FONT_VALUE
+  const [fontSansLocal, setFontSansLocal] = useState<string>(() =>
+    getInitialFontValue(project.fontFamilySans, isValidSansFont)
   );
-  const [fontMonoLocal, setFontMonoLocal] = useState<string>(
-    project.fontFamilyMono && isValidMonoFont(project.fontFamilyMono)
-      ? project.fontFamilyMono
-      : DEFAULT_FONT_VALUE
+  const [fontMonoLocal, setFontMonoLocal] = useState<string>(() =>
+    getInitialFontValue(project.fontFamilyMono, isValidMonoFont)
   );
 
   // Sync state when project changes
   useEffect(() => {
-    setFontSansLocal(
-      project.fontFamilySans && isValidSansFont(project.fontFamilySans)
-        ? project.fontFamilySans
-        : DEFAULT_FONT_VALUE
-    );
-    setFontMonoLocal(
-      project.fontFamilyMono && isValidMonoFont(project.fontFamilyMono)
-        ? project.fontFamilyMono
-        : DEFAULT_FONT_VALUE
-    );
+    setFontSansLocal(getInitialFontValue(project.fontFamilySans, isValidSansFont));
+    setFontMonoLocal(getInitialFontValue(project.fontFamilyMono, isValidMonoFont));
     // Also sync the active tab based on current theme
     const currentIsLight = lightThemes.some((t) => t.value === (project.theme || globalTheme));
     setActiveTab(currentIsLight ? 'light' : 'dark');
