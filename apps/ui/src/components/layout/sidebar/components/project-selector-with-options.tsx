@@ -30,17 +30,41 @@ import {
 import { DndContext, closestCenter } from '@dnd-kit/core';
 import { SortableContext, verticalListSortingStrategy } from '@dnd-kit/sortable';
 import { SortableProjectItem, ThemeMenuItem } from './';
-import { PROJECT_DARK_THEMES, PROJECT_LIGHT_THEMES } from '../constants';
+import { PROJECT_DARK_THEMES, PROJECT_LIGHT_THEMES, THEME_SUBMENU_CONSTANTS } from '../constants';
 import { useProjectPicker, useDragAndDrop, useProjectTheme } from '../hooks';
 import { useKeyboardShortcutsConfig } from '@/hooks/use-keyboard-shortcuts';
 
+/**
+ * Props for the ProjectSelectorWithOptions component.
+ * Defines the interface for the project selector dropdown with additional options menu.
+ */
 interface ProjectSelectorWithOptionsProps {
+  /** Whether the sidebar is currently expanded */
   sidebarOpen: boolean;
+  /** Whether the project picker dropdown is currently open */
   isProjectPickerOpen: boolean;
+  /** Callback to control the project picker dropdown open state */
   setIsProjectPickerOpen: (value: boolean | ((prev: boolean) => boolean)) => void;
+  /** Callback to show the delete project confirmation dialog */
   setShowDeleteProjectDialog: (show: boolean) => void;
 }
 
+/**
+ * A project selector component with search, drag-and-drop reordering, and options menu.
+ *
+ * Features:
+ * - Searchable dropdown for quick project switching
+ * - Drag-and-drop reordering of projects
+ * - Project-specific theme selection with live preview
+ * - Project history navigation (previous/next)
+ * - Option to move project to trash
+ *
+ * The component uses viewport-aware positioning via THEME_SUBMENU_CONSTANTS
+ * for consistent submenu behavior across the application.
+ *
+ * @param props - Component props
+ * @returns The rendered project selector or null if sidebar is closed or no projects exist
+ */
 export function ProjectSelectorWithOptions({
   sidebarOpen,
   isProjectPickerOpen,
@@ -246,7 +270,7 @@ export function ProjectSelectorWithOptions({
               <DropdownMenuSubContent
                 className="w-[420px] bg-popover/95 backdrop-blur-xl"
                 data-testid="project-theme-menu"
-                collisionPadding={32}
+                collisionPadding={THEME_SUBMENU_CONSTANTS.COLLISION_PADDING}
                 onPointerLeave={() => {
                   // Clear preview theme when leaving the dropdown
                   setPreviewTheme(null);
