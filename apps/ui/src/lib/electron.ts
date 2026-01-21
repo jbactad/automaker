@@ -1782,6 +1782,7 @@ function createMockWorktreeAPI(): WorktreeAPI {
           aheadCount: 2,
           behindCount: 0,
           hasRemoteBranch: true,
+          hasAnyRemotes: true,
         },
       };
     },

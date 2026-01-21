@@ -1878,6 +1878,8 @@ export class HttpApiClient implements ElectronAPI {
       this.post('/api/worktree/switch-branch', { worktreePath, branchName }),
     listRemotes: (worktreePath: string) =>
       this.post('/api/worktree/list-remotes', { worktreePath }),
+    addRemote: (worktreePath: string, remoteName: string, remoteUrl: string) =>
+      this.post('/api/worktree/add-remote', { worktreePath, remoteName, remoteUrl }),
     openInEditor: (worktreePath: string, editorCommand?: string) =>
       this.post('/api/worktree/open-in-editor', { worktreePath, editorCommand }),
     getDefaultEditor: () => this.get('/api/worktree/default-editor'),
