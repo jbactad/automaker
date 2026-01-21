@@ -64,12 +64,14 @@ export function TestingSection({ project }: TestingSectionProps) {
     setIsSaving(true);
     try {
       const httpClient = getHttpApiClient();
+      const normalizedCommand = testCommand.trim();
       const response = await httpClient.settings.updateProject(project.path, {
-        testCommand: testCommand.trim() || undefined,
+        testCommand: normalizedCommand || undefined,
       });
 
       if (response.success) {
-        setOriginalTestCommand(testCommand);
+        setTestCommand(normalizedCommand);
+        setOriginalTestCommand(normalizedCommand);
         toast.success('Test command saved');
       } else {
         toast.error('Failed to save test command', {

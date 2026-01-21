@@ -126,6 +126,9 @@ export function useTestLogs({
   // Track the current session ID for filtering events
   const currentSessionId = useRef<string | null>(targetSessionId ?? null);
 
+  // Guard against stale fetch results when switching worktrees/sessions
+  const fetchSeq = useRef(0);
+
   /**
    * Derived state: whether tests are currently running
    */
@@ -137,11 +140,16 @@ export function useTestLogs({
   const fetchLogs = useCallback(async () => {
     if (!worktreePath && !targetSessionId) return;
 
+    // Increment sequence to guard against stale responses
+    const seq = ++fetchSeq.current;
+
     setState((prev) => ({ ...prev, isLoading: true, error: null }));
 
     try {
       const api = getElectronAPI();
       if (!api?.worktree?.getTestLogs) {
+        // Check if this request is still current
+        if (seq !== fetchSeq.current) return;
         setState((prev) => ({
           ...prev,
           isLoading: false,
@@ -151,6 +159,9 @@ export function useTestLogs({
       }
 
       const result = await api.worktree.getTestLogs(worktreePath ?? undefined, targetSessionId);
+
+      // Check if this request is still current (prevent stale updates)
+      if (seq !== fetchSeq.current) return;
 
       if (result.success && result.result) {
         const { sessionId, command, status, testFile, logs, startedAt, finishedAt, exitCode } =
@@ -183,6 +194,8 @@ export function useTestLogs({
         }));
       }
     } catch (error) {
+      // Check if this request is still current
+      if (seq !== fetchSeq.current) return;
       logger.error('Failed to fetch test logs:', error);
       setState((prev) => ({
         ...prev,

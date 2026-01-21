@@ -280,33 +280,36 @@ export function WorktreePanel({
   );
 
   // Handler to start tests for a worktree
-  const handleStartTests = useCallback(async (worktree: WorktreeInfo) => {
-    setIsStartingTests(true);
-    try {
-      const api = getElectronAPI();
-      if (!api?.worktree?.startTests) {
-        toast.error('Test runner API not available');
-        return;
-      }
+  const handleStartTests = useCallback(
+    async (worktree: WorktreeInfo) => {
+      setIsStartingTests(true);
+      try {
+        const api = getElectronAPI();
+        if (!api?.worktree?.startTests) {
+          toast.error('Test runner API not available');
+          return;
+        }
 
-      const result = await api.worktree.startTests(worktree.path, { projectPath });
-      if (result.success) {
-        toast.success('Tests started', {
-          description: `Running tests in ${worktree.branch}`,
-        });
-      } else {
+        const result = await api.worktree.startTests(worktree.path, { projectPath });
+        if (result.success) {
+          toast.success('Tests started', {
+            description: `Running tests in ${worktree.branch}`,
+          });
+        } else {
+          toast.error('Failed to start tests', {
+            description: result.error || 'Unknown error',
+          });
+        }
+      } catch (error) {
         toast.error('Failed to start tests', {
-          description: result.error || 'Unknown error',
+          description: error instanceof Error ? error.message : 'Unknown error',
         });
+      } finally {
+        setIsStartingTests(false);
       }
-    } catch (error) {
-      toast.error('Failed to start tests', {
-        description: error instanceof Error ? error.message : 'Unknown error',
-      });
-    } finally {
-      setIsStartingTests(false);
-    }
-  }, []);
+    },
+    [projectPath]
+  );
 
   // Handler to stop tests for a worktree
   const handleStopTests = useCallback(

@@ -210,6 +210,16 @@ class TestRunnerService {
   }
 
   /**
+   * Sanitize a test file path to prevent command injection
+   * Allows only safe characters for file paths
+   */
+  private sanitizeTestFile(testFile: string): string {
+    // Remove any shell metacharacters and normalize path
+    // Allow only alphanumeric, dots, slashes, hyphens, underscores, colons (for Windows paths)
+    return testFile.replace(/[^a-zA-Z0-9.\\/_\-:]/g, '');
+  }
+
+  /**
    * Start tests in a worktree using the provided command
    *
    * @param worktreePath - Path to the worktree where tests should run
@@ -252,9 +262,11 @@ class TestRunnerService {
     // Build the final command (append test file if specified)
     let finalCommand = command;
     if (testFile) {
+      // Sanitize test file path to prevent command injection
+      const sanitizedFile = this.sanitizeTestFile(testFile);
       // Append the test file to the command
       // Most test runners support: command -- file or command file
-      finalCommand = `${command} -- ${testFile}`;
+      finalCommand = `${command} -- ${sanitizedFile}`;
     }
 
     // Parse command into cmd and args (shell execution)
@@ -650,15 +662,19 @@ export function getTestRunnerService(): TestRunnerService {
 }
 
 // Cleanup on process exit
-process.on('SIGTERM', async () => {
+process.on('SIGTERM', () => {
   if (testRunnerServiceInstance) {
-    await testRunnerServiceInstance.cleanup();
+    testRunnerServiceInstance.cleanup().catch((err) => {
+      logger.error('Cleanup failed on SIGTERM:', err);
+    });
   }
 });
 
-process.on('SIGINT', async () => {
+process.on('SIGINT', () => {
   if (testRunnerServiceInstance) {
-    await testRunnerServiceInstance.cleanup();
+    testRunnerServiceInstance.cleanup().catch((err) => {
+      logger.error('Cleanup failed on SIGINT:', err);
+    });
   }
 });
 

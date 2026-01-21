@@ -61,6 +61,12 @@ function getStatusIndicator(status: TestRunStatus | null): {
         className: 'bg-blue-500/10 text-blue-500',
         icon: <span className="w-1.5 h-1.5 rounded-full bg-blue-500 animate-pulse" />,
       };
+    case 'pending':
+      return {
+        text: 'Pending',
+        className: 'bg-amber-500/10 text-amber-500',
+        icon: <Clock className="w-3 h-3" />,
+      };
     case 'passed':
       return {
         text: 'Passed',
