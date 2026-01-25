@@ -787,11 +787,8 @@ const gracefulShutdown = async (signal: string) => {
 
   // Mark all running features as interrupted before shutdown
   // This ensures they can be resumed when the server restarts
-  try {
-    await autoModeService.markAllRunningFeaturesInterrupted(`${signal} signal received`);
-  } catch (error) {
-    logger.error('Failed to mark running features as interrupted:', error);
-  }
+  // Note: markAllRunningFeaturesInterrupted handles errors internally and never rejects
+  await autoModeService.markAllRunningFeaturesInterrupted(`${signal} signal received`);
 
   terminalService.cleanup();
   server.close(() => {

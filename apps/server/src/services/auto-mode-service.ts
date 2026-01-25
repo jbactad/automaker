@@ -3095,6 +3095,10 @@ Format your response as a structured markdown document.`;
    * restart, process crash, or manual stop). Features with this status can be
    * resumed later using the resume functionality.
    *
+   * Note: Features with pipeline_* statuses are preserved rather than overwritten
+   * to 'interrupted'. This ensures that resumePipelineFeature() can pick up from
+   * the correct pipeline step after a restart.
+   *
    * @param projectPath - Path to the project
    * @param featureId - ID of the feature to mark as interrupted
    * @param reason - Optional reason for the interruption (logged for debugging)
@@ -3104,6 +3108,18 @@ Format your response as a structured markdown document.`;
     featureId: string,
     reason?: string
   ): Promise<void> {
+    // Load the feature to check its current status
+    const feature = await this.loadFeature(projectPath, featureId);
+    const currentStatus = feature?.status;
+
+    // Preserve pipeline_* statuses so resumePipelineFeature can resume from the correct step
+    if (currentStatus && currentStatus.startsWith('pipeline_')) {
+      logger.info(
+        `Feature ${featureId} was in ${currentStatus}; preserving pipeline status for resume`
+      );
+      return;
+    }
+
     if (reason) {
       logger.info(`Marking feature ${featureId} as interrupted: ${reason}`);
     } else {

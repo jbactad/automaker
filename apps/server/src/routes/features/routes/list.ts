@@ -28,25 +28,20 @@ export function createListHandler(featureLoader: FeatureLoader, autoModeService?
       // Run orphan detection in background when project is loaded
       // This detects features whose branches no longer exist (e.g., after merge/delete)
       // We don't await this to keep the list response fast
+      // Note: detectOrphanedFeatures handles errors internally and always resolves
       if (autoModeService) {
-        autoModeService
-          .detectOrphanedFeatures(projectPath)
-          .then((orphanedFeatures) => {
-            if (orphanedFeatures.length > 0) {
+        autoModeService.detectOrphanedFeatures(projectPath).then((orphanedFeatures) => {
+          if (orphanedFeatures.length > 0) {
+            logger.info(
+              `[ProjectLoad] Detected ${orphanedFeatures.length} orphaned feature(s) in ${projectPath}`
+            );
+            for (const { feature, missingBranch } of orphanedFeatures) {
               logger.info(
-                `[ProjectLoad] Detected ${orphanedFeatures.length} orphaned feature(s) in ${projectPath}`
+                `[ProjectLoad] Orphaned: ${feature.title || feature.id} - branch "${missingBranch}" no longer exists`
               );
-              for (const { feature, missingBranch } of orphanedFeatures) {
-                logger.info(
-                  `[ProjectLoad] Orphaned: ${feature.title || feature.id} - branch "${missingBranch}" no longer exists`
-                );
-              }
             }
-          })
-          .catch((error: unknown) => {
-            const errorMessage = error instanceof Error ? error.message : String(error);
-            logger.warn(`[ProjectLoad] Failed to detect orphaned features: ${errorMessage}`);
-          });
+          }
+        });
       }
 
       res.json({ success: true, features });
