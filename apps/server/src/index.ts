@@ -16,7 +16,7 @@ import { createServer } from 'http';
 import dotenv from 'dotenv';
 
 import { createEventEmitter, type EventEmitter } from './lib/events.js';
-import { initAllowedPaths } from '@automaker/platform';
+import { initAllowedPaths, getClaudeAuthIndicators } from '@automaker/platform';
 import { createLogger, setLogLevel, LogLevel } from '@automaker/utils';
 
 const logger = createLogger('Server');
@@ -117,15 +117,44 @@ export function isRequestLoggingEnabled(): boolean {
 // Width for log box content (excluding borders)
 const BOX_CONTENT_WIDTH = 67;
 
-// Check for required environment variables
-const hasAnthropicKey = !!process.env.ANTHROPIC_API_KEY;
+// Check for Claude authentication (async - runs in background)
+// The Claude Agent SDK can use either ANTHROPIC_API_KEY or Claude Code CLI authentication
+(async () => {
+  const hasAnthropicKey = !!process.env.ANTHROPIC_API_KEY;
 
-if (!hasAnthropicKey) {
+  if (hasAnthropicKey) {
+    logger.info('✓ ANTHROPIC_API_KEY detected');
+    return;
+  }
+
+  // Check for Claude Code CLI authentication
+  try {
+    const indicators = await getClaudeAuthIndicators();
+    const hasCliAuth =
+      indicators.hasStatsCacheWithActivity ||
+      (indicators.hasSettingsFile && indicators.hasProjectsSessions) ||
+      (indicators.hasCredentialsFile &&
+        (indicators.credentials?.hasOAuthToken || indicators.credentials?.hasApiKey));
+
+    if (hasCliAuth) {
+      logger.info('✓ Claude Code CLI authentication detected');
+      return;
+    }
+  } catch (error) {
+    // Ignore errors checking CLI auth - will fall through to warning
+    logger.warn('Error checking for Claude Code CLI authentication:', error);
+  }
+
+  // No authentication found - show warning
   const wHeader = '⚠️  WARNING: No Claude authentication configured'.padEnd(BOX_CONTENT_WIDTH);
   const w1 = 'The Claude Agent SDK requires authentication to function.'.padEnd(BOX_CONTENT_WIDTH);
-  const w2 = 'Set your Anthropic API key:'.padEnd(BOX_CONTENT_WIDTH);
-  const w3 = '  export ANTHROPIC_API_KEY="sk-ant-..."'.padEnd(BOX_CONTENT_WIDTH);
-  const w4 = 'Or use the setup wizard in Settings to configure authentication.'.padEnd(
+  const w2 = 'Options:'.padEnd(BOX_CONTENT_WIDTH);
+  const w3 = '1. Install Claude Code CLI and authenticate with subscription'.padEnd(
+    BOX_CONTENT_WIDTH
+  );
+  const w4 = '2. Set your Anthropic API key:'.padEnd(BOX_CONTENT_WIDTH);
+  const w5 = '   export ANTHROPIC_API_KEY="sk-ant-..."'.padEnd(BOX_CONTENT_WIDTH);
+  const w6 = '3. Use the setup wizard in Settings to configure authentication.'.padEnd(
     BOX_CONTENT_WIDTH
   );
 
@@ -138,14 +167,13 @@ if (!hasAnthropicKey) {
 ║                                                                     ║
 ║  ${w2}║
 ║  ${w3}║
-║                                                                     ║
 ║  ${w4}║
+║  ${w5}║
+║  ${w6}║
 ║                                                                     ║
 ╚═════════════════════════════════════════════════════════════════════╝
 `);
-} else {
-  logger.info('✓ ANTHROPIC_API_KEY detected');
-}
+})();
 
 // Initialize security
 initAllowedPaths();
