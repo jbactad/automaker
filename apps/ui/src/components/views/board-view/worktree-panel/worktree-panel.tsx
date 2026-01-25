@@ -383,13 +383,13 @@ export function WorktreePanel({
 
   const isMobile = useIsMobile();
 
-  // Periodic interval check (5 seconds) to detect branch changes on disk
-  // Reduced from 1s to 5s to minimize GPU/CPU usage from frequent re-renders
+  // Periodic interval check (30 seconds) to detect branch changes on disk
+  // Reduced polling to lessen repeated worktree list calls while keeping UI reasonably fresh
   const intervalRef = useRef<NodeJS.Timeout | null>(null);
   useEffect(() => {
     intervalRef.current = setInterval(() => {
       fetchWorktrees({ silent: true });
-    }, 5000);
+    }, 30000);
 
     return () => {
       if (intervalRef.current) {
