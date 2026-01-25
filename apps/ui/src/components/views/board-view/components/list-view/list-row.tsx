@@ -3,7 +3,7 @@
 // @ts-nocheck
 import { memo, useCallback, useState, useEffect } from 'react';
 import { cn } from '@/lib/utils';
-import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
+import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip';
 import { AlertCircle, Lock, Hand, Sparkles, FileText } from 'lucide-react';
 import type { Feature } from '@/store/app-store';
 import { RowActions, type RowActionHandlers } from './row-actions';
@@ -149,29 +149,27 @@ const IndicatorBadges = memo(function IndicatorBadges({
 
   return (
     <div className="flex items-center gap-1 ml-2">
-      <TooltipProvider delayDuration={200}>
-        {badges.map((badge) => (
-          <Tooltip key={badge.key}>
-            <TooltipTrigger asChild>
-              <div
-                className={cn(
-                  'inline-flex items-center justify-center w-5 h-5 rounded border',
-                  badge.colorClass,
-                  badge.bgClass,
-                  badge.borderClass,
-                  badge.animate && 'animate-pulse'
-                )}
-                data-testid={`list-row-badge-${badge.key}`}
-              >
-                <badge.icon className="w-3 h-3" />
-              </div>
-            </TooltipTrigger>
-            <TooltipContent side="top" className="text-xs max-w-[250px]">
-              <p>{badge.tooltip}</p>
-            </TooltipContent>
-          </Tooltip>
-        ))}
-      </TooltipProvider>
+      {badges.map((badge) => (
+        <Tooltip key={badge.key}>
+          <TooltipTrigger asChild>
+            <div
+              className={cn(
+                'inline-flex items-center justify-center w-5 h-5 rounded border',
+                badge.colorClass,
+                badge.bgClass,
+                badge.borderClass,
+                badge.animate && 'animate-pulse'
+              )}
+              data-testid={`list-row-badge-${badge.key}`}
+            >
+              <badge.icon className="w-3 h-3" />
+            </div>
+          </TooltipTrigger>
+          <TooltipContent side="top" className="text-xs max-w-[250px]">
+            <p>{badge.tooltip}</p>
+          </TooltipContent>
+        </Tooltip>
+      ))}
     </div>
   );
 });

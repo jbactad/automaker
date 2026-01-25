@@ -24,7 +24,7 @@ import type { WorkMode } from '../shared';
 import { PhaseModelSelector } from '@/components/views/settings-view/model-defaults/phase-model-selector';
 import { isCursorModel, isClaudeModel, type PhaseModelEntry } from '@automaker/types';
 import { cn } from '@/lib/utils';
-import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
+import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip';
 
 interface MassEditDialogProps {
   open: boolean;
@@ -302,37 +302,35 @@ export function MassEditDialog({
               />
             </FieldWrapper>
           ) : (
-            <TooltipProvider>
-              <Tooltip>
-                <TooltipTrigger asChild>
-                  <div
-                    className={cn(
-                      'p-3 rounded-lg border transition-colors border-border bg-muted/20 opacity-50 cursor-not-allowed'
-                    )}
-                  >
-                    <div className="flex items-center justify-between mb-3">
-                      <div className="flex items-center gap-2">
-                        <Checkbox checked={false} disabled className="opacity-50" />
-                        <Label className="text-sm font-medium text-muted-foreground">
-                          Planning Mode
-                        </Label>
-                      </div>
-                    </div>
-                    <div className="opacity-50 pointer-events-none">
-                      <PlanningModeSelect
-                        mode="skip"
-                        onModeChange={() => {}}
-                        testIdPrefix="mass-edit-planning"
-                        disabled
-                      />
+            <Tooltip>
+              <TooltipTrigger asChild>
+                <div
+                  className={cn(
+                    'p-3 rounded-lg border transition-colors border-border bg-muted/20 opacity-50 cursor-not-allowed'
+                  )}
+                >
+                  <div className="flex items-center justify-between mb-3">
+                    <div className="flex items-center gap-2">
+                      <Checkbox checked={false} disabled className="opacity-50" />
+                      <Label className="text-sm font-medium text-muted-foreground">
+                        Planning Mode
+                      </Label>
                     </div>
                   </div>
-                </TooltipTrigger>
-                <TooltipContent>
-                  <p>Planning modes are only available for Claude Provider</p>
-                </TooltipContent>
-              </Tooltip>
-            </TooltipProvider>
+                  <div className="opacity-50 pointer-events-none">
+                    <PlanningModeSelect
+                      mode="skip"
+                      onModeChange={() => {}}
+                      testIdPrefix="mass-edit-planning"
+                      disabled
+                    />
+                  </div>
+                </div>
+              </TooltipTrigger>
+              <TooltipContent>
+                <p>Planning modes are only available for Claude Provider</p>
+              </TooltipContent>
+            </Tooltip>
           )}
 
           {/* Priority */}

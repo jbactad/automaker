@@ -13,7 +13,7 @@ import {
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
-import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
+import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip';
 
 // Map section labels to icons
 const sectionIcons: Record<string, React.ComponentType<{ className?: string }>> = {
@@ -158,27 +158,25 @@ export function SidebarNavigation({
             {/* Section icon with dropdown (collapsed sidebar) */}
             {section.label && !sidebarOpen && SectionIcon && section.collapsible && isCollapsed && (
               <DropdownMenu>
-                <TooltipProvider delayDuration={0}>
-                  <Tooltip>
-                    <TooltipTrigger asChild>
-                      <DropdownMenuTrigger asChild>
-                        <button
-                          className={cn(
-                            'group flex items-center justify-center w-full py-2 rounded-lg',
-                            'text-muted-foreground hover:text-foreground',
-                            'hover:bg-accent/50 border border-transparent hover:border-border/40',
-                            'transition-all duration-200 ease-out'
-                          )}
-                        >
-                          <SectionIcon className="w-[18px] h-[18px]" />
-                        </button>
-                      </DropdownMenuTrigger>
-                    </TooltipTrigger>
-                    <TooltipContent side="right" sideOffset={8}>
-                      {section.label}
-                    </TooltipContent>
-                  </Tooltip>
-                </TooltipProvider>
+                <Tooltip>
+                  <TooltipTrigger asChild>
+                    <DropdownMenuTrigger asChild>
+                      <button
+                        className={cn(
+                          'group flex items-center justify-center w-full py-2 rounded-lg',
+                          'text-muted-foreground hover:text-foreground',
+                          'hover:bg-accent/50 border border-transparent hover:border-border/40',
+                          'transition-all duration-200 ease-out'
+                        )}
+                      >
+                        <SectionIcon className="w-[18px] h-[18px]" />
+                      </button>
+                    </DropdownMenuTrigger>
+                  </TooltipTrigger>
+                  <TooltipContent side="right" sideOffset={8}>
+                    {section.label}
+                  </TooltipContent>
+                </Tooltip>
                 <DropdownMenuContent side="right" align="start" sideOffset={8} className="w-48">
                   {section.items.map((item) => {
                     const ItemIcon = item.icon;

@@ -7,6 +7,7 @@ import { useSettingsSync } from './hooks/use-settings-sync';
 import { useCursorStatusInit } from './hooks/use-cursor-status-init';
 import { useProviderAuthInit } from './hooks/use-provider-auth-init';
 import { useAppStore } from './store/app-store';
+import { TooltipProvider } from '@/components/ui/tooltip';
 import './styles/global.css';
 import './styles/theme-imports';
 import './styles/font-imports';
@@ -75,9 +76,9 @@ export default function App() {
   }, []);
 
   return (
-    <>
+    <TooltipProvider delayDuration={300}>
       <RouterProvider router={router} />
       {showSplash && !disableSplashScreen && <SplashScreen onComplete={handleSplashComplete} />}
-    </>
+    </TooltipProvider>
   );
 }

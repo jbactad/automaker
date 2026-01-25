@@ -8,7 +8,7 @@ import {
   DropdownMenuTrigger,
   DropdownMenuGroup,
 } from '@/components/ui/dropdown-menu';
-import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
+import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip';
 import {
   GitBranch,
   ChevronDown,
@@ -335,14 +335,12 @@ export function WorktreeDropdown({
   const dropdownTrigger = <DropdownMenuTrigger asChild>{triggerButton}</DropdownMenuTrigger>;
 
   const triggerWithTooltip = isBranchNameTruncated ? (
-    <TooltipProvider>
-      <Tooltip>
-        <TooltipTrigger asChild>{dropdownTrigger}</TooltipTrigger>
-        <TooltipContent>
-          <p className="font-mono text-xs">{displayBranch}</p>
-        </TooltipContent>
-      </Tooltip>
-    </TooltipProvider>
+    <Tooltip>
+      <TooltipTrigger asChild>{dropdownTrigger}</TooltipTrigger>
+      <TooltipContent>
+        <p className="font-mono text-xs">{displayBranch}</p>
+      </TooltipContent>
+    </Tooltip>
   ) : (
     dropdownTrigger
   );

@@ -3,7 +3,7 @@ import { Button } from '@/components/ui/button';
 import { Globe, CircleDot, GitPullRequest } from 'lucide-react';
 import { Spinner } from '@/components/ui/spinner';
 import { cn } from '@/lib/utils';
-import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
+import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip';
 import { useDroppable } from '@dnd-kit/core';
 import type {
   WorktreeInfo,
@@ -271,29 +271,27 @@ export function WorktreeTab({
               </span>
             )}
             {hasChanges && (
-              <TooltipProvider>
-                <Tooltip>
-                  <TooltipTrigger asChild>
-                    <span
-                      className={cn(
-                        'inline-flex items-center justify-center h-4 min-w-[1rem] px-1 text-[10px] font-medium rounded border',
-                        isSelected
-                          ? 'bg-amber-500 text-amber-950 border-amber-400'
-                          : 'bg-amber-500/20 text-amber-600 dark:text-amber-400 border-amber-500/30'
-                      )}
-                    >
-                      <CircleDot className="w-2.5 h-2.5 mr-0.5" />
-                      {changedFilesCount ?? '!'}
-                    </span>
-                  </TooltipTrigger>
-                  <TooltipContent>
-                    <p>
-                      {changedFilesCount ?? 'Some'} uncommitted file
-                      {changedFilesCount !== 1 ? 's' : ''}
-                    </p>
-                  </TooltipContent>
-                </Tooltip>
-              </TooltipProvider>
+              <Tooltip>
+                <TooltipTrigger asChild>
+                  <span
+                    className={cn(
+                      'inline-flex items-center justify-center h-4 min-w-[1rem] px-1 text-[10px] font-medium rounded border',
+                      isSelected
+                        ? 'bg-amber-500 text-amber-950 border-amber-400'
+                        : 'bg-amber-500/20 text-amber-600 dark:text-amber-400 border-amber-500/30'
+                    )}
+                  >
+                    <CircleDot className="w-2.5 h-2.5 mr-0.5" />
+                    {changedFilesCount ?? '!'}
+                  </span>
+                </TooltipTrigger>
+                <TooltipContent>
+                  <p>
+                    {changedFilesCount ?? 'Some'} uncommitted file
+                    {changedFilesCount !== 1 ? 's' : ''}
+                  </p>
+                </TooltipContent>
+              </Tooltip>
             )}
             {prBadge}
           </Button>
@@ -340,78 +338,72 @@ export function WorktreeTab({
             </span>
           )}
           {hasChanges && (
-            <TooltipProvider>
-              <Tooltip>
-                <TooltipTrigger asChild>
-                  <span
-                    className={cn(
-                      'inline-flex items-center justify-center h-4 min-w-[1rem] px-1 text-[10px] font-medium rounded border',
-                      isSelected
-                        ? 'bg-amber-500 text-amber-950 border-amber-400'
-                        : 'bg-amber-500/20 text-amber-600 dark:text-amber-400 border-amber-500/30'
-                    )}
-                  >
-                    <CircleDot className="w-2.5 h-2.5 mr-0.5" />
-                    {changedFilesCount ?? '!'}
-                  </span>
-                </TooltipTrigger>
-                <TooltipContent>
-                  <p>
-                    {changedFilesCount ?? 'Some'} uncommitted file
-                    {changedFilesCount !== 1 ? 's' : ''}
-                  </p>
-                </TooltipContent>
-              </Tooltip>
-            </TooltipProvider>
+            <Tooltip>
+              <TooltipTrigger asChild>
+                <span
+                  className={cn(
+                    'inline-flex items-center justify-center h-4 min-w-[1rem] px-1 text-[10px] font-medium rounded border',
+                    isSelected
+                      ? 'bg-amber-500 text-amber-950 border-amber-400'
+                      : 'bg-amber-500/20 text-amber-600 dark:text-amber-400 border-amber-500/30'
+                  )}
+                >
+                  <CircleDot className="w-2.5 h-2.5 mr-0.5" />
+                  {changedFilesCount ?? '!'}
+                </span>
+              </TooltipTrigger>
+              <TooltipContent>
+                <p>
+                  {changedFilesCount ?? 'Some'} uncommitted file
+                  {changedFilesCount !== 1 ? 's' : ''}
+                </p>
+              </TooltipContent>
+            </Tooltip>
           )}
           {prBadge}
         </Button>
       )}
 
       {isDevServerRunning && (
-        <TooltipProvider>
-          <Tooltip>
-            <TooltipTrigger asChild>
-              <Button
-                variant={isSelected ? 'default' : 'outline'}
-                size="sm"
-                className={cn(
-                  'h-7 w-7 p-0 rounded-none border-r-0',
-                  isSelected && 'bg-primary text-primary-foreground',
-                  !isSelected && 'bg-secondary/50 hover:bg-secondary',
-                  'text-green-500'
-                )}
-                onClick={() => onOpenDevServerUrl(worktree)}
-                aria-label={`Open dev server on port ${devServerInfo?.port} in browser`}
-              >
-                <Globe className="w-3 h-3" aria-hidden="true" />
-              </Button>
-            </TooltipTrigger>
-            <TooltipContent>
-              <p>Open dev server (:{devServerInfo?.port})</p>
-            </TooltipContent>
-          </Tooltip>
-        </TooltipProvider>
+        <Tooltip>
+          <TooltipTrigger asChild>
+            <Button
+              variant={isSelected ? 'default' : 'outline'}
+              size="sm"
+              className={cn(
+                'h-7 w-7 p-0 rounded-none border-r-0',
+                isSelected && 'bg-primary text-primary-foreground',
+                !isSelected && 'bg-secondary/50 hover:bg-secondary',
+                'text-green-500'
+              )}
+              onClick={() => onOpenDevServerUrl(worktree)}
+              aria-label={`Open dev server on port ${devServerInfo?.port} in browser`}
+            >
+              <Globe className="w-3 h-3" aria-hidden="true" />
+            </Button>
+          </TooltipTrigger>
+          <TooltipContent>
+            <p>Open dev server (:{devServerInfo?.port})</p>
+          </TooltipContent>
+        </Tooltip>
       )}
 
       {isAutoModeRunning && (
-        <TooltipProvider>
-          <Tooltip>
-            <TooltipTrigger asChild>
-              <span
-                className={cn(
-                  'flex items-center justify-center h-7 px-1.5 rounded-none border-r-0',
-                  isSelected ? 'bg-primary text-primary-foreground' : 'bg-secondary/50'
-                )}
-              >
-                <span className="h-2 w-2 rounded-full bg-green-500 animate-pulse" />
-              </span>
-            </TooltipTrigger>
-            <TooltipContent>
-              <p>Auto Mode Running</p>
-            </TooltipContent>
-          </Tooltip>
-        </TooltipProvider>
+        <Tooltip>
+          <TooltipTrigger asChild>
+            <span
+              className={cn(
+                'flex items-center justify-center h-7 px-1.5 rounded-none border-r-0',
+                isSelected ? 'bg-primary text-primary-foreground' : 'bg-secondary/50'
+              )}
+            >
+              <span className="h-2 w-2 rounded-full bg-green-500 animate-pulse" />
+            </span>
+          </TooltipTrigger>
+          <TooltipContent>
+            <p>Auto Mode Running</p>
+          </TooltipContent>
+        </Tooltip>
       )}
 
       <WorktreeActionsDropdown

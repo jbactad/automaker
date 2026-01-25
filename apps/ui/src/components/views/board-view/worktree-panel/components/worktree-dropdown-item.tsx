@@ -1,5 +1,5 @@
 import { DropdownMenuItem } from '@/components/ui/dropdown-menu';
-import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
+import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip';
 import { Check, CircleDot, Globe, GitPullRequest, FlaskConical } from 'lucide-react';
 import { Spinner } from '@/components/ui/spinner';
 import { cn } from '@/lib/utils';
@@ -101,14 +101,12 @@ export function WorktreeDropdownItem({
 
         {/* Branch name with optional tooltip */}
         {isBranchNameTruncated ? (
-          <TooltipProvider>
-            <Tooltip>
-              <TooltipTrigger asChild>{branchNameElement}</TooltipTrigger>
-              <TooltipContent>
-                <p className="font-mono text-xs">{worktree.branch}</p>
-              </TooltipContent>
-            </Tooltip>
-          </TooltipProvider>
+          <Tooltip>
+            <TooltipTrigger asChild>{branchNameElement}</TooltipTrigger>
+            <TooltipContent>
+              <p className="font-mono text-xs">{worktree.branch}</p>
+            </TooltipContent>
+          </Tooltip>
         ) : (
           branchNameElement
         )}

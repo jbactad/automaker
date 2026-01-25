@@ -41,7 +41,7 @@ import {
 } from '../shared';
 import type { WorkMode } from '../shared';
 import { PhaseModelSelector } from '@/components/views/settings-view/model-defaults/phase-model-selector';
-import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
+import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip';
 import { DependencyTreeDialog } from './dependency-tree-dialog';
 import { isClaudeModel, supportsReasoningEffort } from '@automaker/types';
 
@@ -420,26 +420,24 @@ export function EditFeatureDialog({
                 <Cpu className="w-4 h-4 text-muted-foreground" />
                 <span>AI & Execution</span>
               </div>
-              <TooltipProvider>
-                <Tooltip>
-                  <TooltipTrigger asChild>
-                    <button
-                      type="button"
-                      onClick={() => {
-                        onClose();
-                        navigate({ to: '/settings', search: { view: 'defaults' } });
-                      }}
-                      className="flex items-center gap-1 text-xs text-muted-foreground hover:text-foreground transition-colors"
-                    >
-                      <Settings2 className="w-3.5 h-3.5" />
-                      <span>Edit Defaults</span>
-                    </button>
-                  </TooltipTrigger>
-                  <TooltipContent>
-                    <p>Change default model and planning settings for new features</p>
-                  </TooltipContent>
-                </Tooltip>
-              </TooltipProvider>
+              <Tooltip>
+                <TooltipTrigger asChild>
+                  <button
+                    type="button"
+                    onClick={() => {
+                      onClose();
+                      navigate({ to: '/settings', search: { view: 'defaults' } });
+                    }}
+                    className="flex items-center gap-1 text-xs text-muted-foreground hover:text-foreground transition-colors"
+                  >
+                    <Settings2 className="w-3.5 h-3.5" />
+                    <span>Edit Defaults</span>
+                  </button>
+                </TooltipTrigger>
+                <TooltipContent>
+                  <p>Change default model and planning settings for new features</p>
+                </TooltipContent>
+              </Tooltip>
             </div>
 
             <div className="space-y-1.5">
@@ -470,24 +468,22 @@ export function EditFeatureDialog({
                     compact
                   />
                 ) : (
-                  <TooltipProvider>
-                    <Tooltip>
-                      <TooltipTrigger asChild>
-                        <div>
-                          <PlanningModeSelect
-                            mode="skip"
-                            onModeChange={() => {}}
-                            testIdPrefix="edit-feature-planning"
-                            compact
-                            disabled
-                          />
-                        </div>
-                      </TooltipTrigger>
-                      <TooltipContent>
-                        <p>Planning modes are only available for Claude Provider</p>
-                      </TooltipContent>
-                    </Tooltip>
-                  </TooltipProvider>
+                  <Tooltip>
+                    <TooltipTrigger asChild>
+                      <div>
+                        <PlanningModeSelect
+                          mode="skip"
+                          onModeChange={() => {}}
+                          testIdPrefix="edit-feature-planning"
+                          compact
+                          disabled
+                        />
+                      </div>
+                    </TooltipTrigger>
+                    <TooltipContent>
+                      <p>Planning modes are only available for Claude Provider</p>
+                    </TooltipContent>
+                  </Tooltip>
                 )}
               </div>
               <div className="space-y-1.5">

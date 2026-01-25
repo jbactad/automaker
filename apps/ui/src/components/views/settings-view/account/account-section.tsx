@@ -8,7 +8,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from '@/components/ui/select';
-import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
+import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip';
 import { toast } from 'sonner';
 import { LogOut, User, Code2, RefreshCw } from 'lucide-react';
 import { Spinner } from '@/components/ui/spinner';
@@ -134,24 +134,22 @@ export function AccountSection() {
                 })}
               </SelectContent>
             </Select>
-            <TooltipProvider>
-              <Tooltip>
-                <TooltipTrigger asChild>
-                  <Button
-                    variant="ghost"
-                    size="icon"
-                    onClick={handleRefreshEditors}
-                    disabled={isRefreshing || isLoadingEditors}
-                    className="shrink-0 h-9 w-9"
-                  >
-                    {isRefreshing ? <Spinner size="sm" /> : <RefreshCw className="w-4 h-4" />}
-                  </Button>
-                </TooltipTrigger>
-                <TooltipContent>
-                  <p>Refresh available editors</p>
-                </TooltipContent>
-              </Tooltip>
-            </TooltipProvider>
+            <Tooltip>
+              <TooltipTrigger asChild>
+                <Button
+                  variant="ghost"
+                  size="icon"
+                  onClick={handleRefreshEditors}
+                  disabled={isRefreshing || isLoadingEditors}
+                  className="shrink-0 h-9 w-9"
+                >
+                  {isRefreshing ? <Spinner size="sm" /> : <RefreshCw className="w-4 h-4" />}
+                </Button>
+              </TooltipTrigger>
+              <TooltipContent>
+                <p>Refresh available editors</p>
+              </TooltipContent>
+            </Tooltip>
           </div>
         </div>
 

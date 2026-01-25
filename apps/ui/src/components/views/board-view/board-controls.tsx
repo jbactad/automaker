@@ -1,4 +1,4 @@
-import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
+import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip';
 import { ImageIcon } from 'lucide-react';
 import { cn } from '@/lib/utils';
 
@@ -18,24 +18,22 @@ export function BoardControls({ isMounted, onShowBoardBackground }: BoardControl
   );
 
   return (
-    <TooltipProvider>
-      <div className="flex items-center gap-2">
-        {/* Board Background Button */}
-        <Tooltip>
-          <TooltipTrigger asChild>
-            <button
-              onClick={onShowBoardBackground}
-              className={buttonClass}
-              data-testid="board-background-button"
-            >
-              <ImageIcon className="w-4 h-4" />
-            </button>
-          </TooltipTrigger>
-          <TooltipContent>
-            <p>Board Background Settings</p>
-          </TooltipContent>
-        </Tooltip>
-      </div>
-    </TooltipProvider>
+    <div className="flex items-center gap-2">
+      {/* Board Background Button */}
+      <Tooltip>
+        <TooltipTrigger asChild>
+          <button
+            onClick={onShowBoardBackground}
+            className={buttonClass}
+            data-testid="board-background-button"
+          >
+            <ImageIcon className="w-4 h-4" />
+          </button>
+        </TooltipTrigger>
+        <TooltipContent>
+          <p>Board Background Settings</p>
+        </TooltipContent>
+      </Tooltip>
+    </div>
   );
 }

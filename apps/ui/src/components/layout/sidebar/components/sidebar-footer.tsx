@@ -5,7 +5,7 @@ import { formatShortcut } from '@/store/app-store';
 import { Activity, Settings, BookOpen, MessageSquare, ExternalLink } from 'lucide-react';
 import { useOSDetection } from '@/hooks/use-os-detection';
 import { getElectronAPI } from '@/lib/electron';
-import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
+import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip';
 
 function getOSAbbreviation(os: string): string {
   switch (os) {
@@ -72,68 +72,14 @@ export function SidebarFooter({
         <div className="flex flex-col items-center py-2 px-2 gap-1">
           {/* Running Agents */}
           {!hideRunningAgents && (
-            <TooltipProvider delayDuration={0}>
-              <Tooltip>
-                <TooltipTrigger asChild>
-                  <button
-                    onClick={() => navigate({ to: '/running-agents' })}
-                    className={cn(
-                      'relative flex items-center justify-center w-10 h-10 rounded-xl',
-                      'transition-all duration-200 ease-out titlebar-no-drag',
-                      isActiveRoute('running-agents')
-                        ? [
-                            'bg-gradient-to-r from-brand-500/20 via-brand-500/15 to-brand-600/10',
-                            'text-foreground border border-brand-500/30',
-                            'shadow-md shadow-brand-500/10',
-                          ]
-                        : [
-                            'text-muted-foreground hover:text-foreground',
-                            'hover:bg-accent/50 border border-transparent hover:border-border/40',
-                          ]
-                    )}
-                    data-testid="running-agents-link"
-                  >
-                    <Activity
-                      className={cn(
-                        'w-[18px] h-[18px]',
-                        isActiveRoute('running-agents') && 'text-brand-500'
-                      )}
-                    />
-                    {runningAgentsCount > 0 && (
-                      <span
-                        className={cn(
-                          'absolute -top-1 -right-1 flex items-center justify-center',
-                          'min-w-4 h-4 px-1 text-[9px] font-bold rounded-full',
-                          'bg-brand-500 text-white shadow-sm'
-                        )}
-                      >
-                        {runningAgentsCount > 99 ? '99' : runningAgentsCount}
-                      </span>
-                    )}
-                  </button>
-                </TooltipTrigger>
-                <TooltipContent side="right" sideOffset={8}>
-                  Running Agents
-                  {runningAgentsCount > 0 && (
-                    <span className="ml-2 px-1.5 py-0.5 bg-brand-500 text-white rounded-full text-[10px]">
-                      {runningAgentsCount}
-                    </span>
-                  )}
-                </TooltipContent>
-              </Tooltip>
-            </TooltipProvider>
-          )}
-
-          {/* Settings */}
-          <TooltipProvider delayDuration={0}>
             <Tooltip>
               <TooltipTrigger asChild>
                 <button
-                  onClick={() => navigate({ to: '/settings' })}
+                  onClick={() => navigate({ to: '/running-agents' })}
                   className={cn(
-                    'flex items-center justify-center w-10 h-10 rounded-xl',
+                    'relative flex items-center justify-center w-10 h-10 rounded-xl',
                     'transition-all duration-200 ease-out titlebar-no-drag',
-                    isActiveRoute('settings')
+                    isActiveRoute('running-agents')
                       ? [
                           'bg-gradient-to-r from-brand-500/20 via-brand-500/15 to-brand-600/10',
                           'text-foreground border border-brand-500/30',
@@ -144,72 +90,115 @@ export function SidebarFooter({
                           'hover:bg-accent/50 border border-transparent hover:border-border/40',
                         ]
                   )}
-                  data-testid="settings-button"
+                  data-testid="running-agents-link"
                 >
-                  <Settings
+                  <Activity
                     className={cn(
                       'w-[18px] h-[18px]',
-                      isActiveRoute('settings') && 'text-brand-500'
+                      isActiveRoute('running-agents') && 'text-brand-500'
                     )}
                   />
+                  {runningAgentsCount > 0 && (
+                    <span
+                      className={cn(
+                        'absolute -top-1 -right-1 flex items-center justify-center',
+                        'min-w-4 h-4 px-1 text-[9px] font-bold rounded-full',
+                        'bg-brand-500 text-white shadow-sm'
+                      )}
+                    >
+                      {runningAgentsCount > 99 ? '99' : runningAgentsCount}
+                    </span>
+                  )}
                 </button>
               </TooltipTrigger>
               <TooltipContent side="right" sideOffset={8}>
-                Global Settings
-                <span className="ml-2 px-1.5 py-0.5 bg-muted rounded text-[10px] font-mono text-muted-foreground">
-                  {formatShortcut(shortcuts.settings, true)}
-                </span>
+                Running Agents
+                {runningAgentsCount > 0 && (
+                  <span className="ml-2 px-1.5 py-0.5 bg-brand-500 text-white rounded-full text-[10px]">
+                    {runningAgentsCount}
+                  </span>
+                )}
               </TooltipContent>
             </Tooltip>
-          </TooltipProvider>
+          )}
+
+          {/* Settings */}
+          <Tooltip>
+            <TooltipTrigger asChild>
+              <button
+                onClick={() => navigate({ to: '/settings' })}
+                className={cn(
+                  'flex items-center justify-center w-10 h-10 rounded-xl',
+                  'transition-all duration-200 ease-out titlebar-no-drag',
+                  isActiveRoute('settings')
+                    ? [
+                        'bg-gradient-to-r from-brand-500/20 via-brand-500/15 to-brand-600/10',
+                        'text-foreground border border-brand-500/30',
+                        'shadow-md shadow-brand-500/10',
+                      ]
+                    : [
+                        'text-muted-foreground hover:text-foreground',
+                        'hover:bg-accent/50 border border-transparent hover:border-border/40',
+                      ]
+                )}
+                data-testid="settings-button"
+              >
+                <Settings
+                  className={cn('w-[18px] h-[18px]', isActiveRoute('settings') && 'text-brand-500')}
+                />
+              </button>
+            </TooltipTrigger>
+            <TooltipContent side="right" sideOffset={8}>
+              Global Settings
+              <span className="ml-2 px-1.5 py-0.5 bg-muted rounded text-[10px] font-mono text-muted-foreground">
+                {formatShortcut(shortcuts.settings, true)}
+              </span>
+            </TooltipContent>
+          </Tooltip>
 
           {/* Documentation */}
           {!hideWiki && (
-            <TooltipProvider delayDuration={0}>
-              <Tooltip>
-                <TooltipTrigger asChild>
-                  <button
-                    onClick={handleWikiClick}
-                    className={cn(
-                      'flex items-center justify-center w-10 h-10 rounded-xl',
-                      'text-muted-foreground hover:text-foreground',
-                      'hover:bg-accent/50 border border-transparent hover:border-border/40',
-                      'transition-all duration-200 ease-out titlebar-no-drag'
-                    )}
-                    data-testid="documentation-button"
-                  >
-                    <BookOpen className="w-[18px] h-[18px]" />
-                  </button>
-                </TooltipTrigger>
-                <TooltipContent side="right" sideOffset={8}>
-                  Documentation
-                </TooltipContent>
-              </Tooltip>
-            </TooltipProvider>
-          )}
-
-          {/* Feedback */}
-          <TooltipProvider delayDuration={0}>
             <Tooltip>
               <TooltipTrigger asChild>
                 <button
-                  onClick={handleFeedbackClick}
+                  onClick={handleWikiClick}
                   className={cn(
                     'flex items-center justify-center w-10 h-10 rounded-xl',
                     'text-muted-foreground hover:text-foreground',
                     'hover:bg-accent/50 border border-transparent hover:border-border/40',
                     'transition-all duration-200 ease-out titlebar-no-drag'
                   )}
-                  data-testid="feedback-button"
+                  data-testid="documentation-button"
                 >
-                  <MessageSquare className="w-[18px] h-[18px]" />
+                  <BookOpen className="w-[18px] h-[18px]" />
                 </button>
               </TooltipTrigger>
               <TooltipContent side="right" sideOffset={8}>
-                Feedback
+                Documentation
               </TooltipContent>
             </Tooltip>
-          </TooltipProvider>
+          )}
+
+          {/* Feedback */}
+          <Tooltip>
+            <TooltipTrigger asChild>
+              <button
+                onClick={handleFeedbackClick}
+                className={cn(
+                  'flex items-center justify-center w-10 h-10 rounded-xl',
+                  'text-muted-foreground hover:text-foreground',
+                  'hover:bg-accent/50 border border-transparent hover:border-border/40',
+                  'transition-all duration-200 ease-out titlebar-no-drag'
+                )}
+                data-testid="feedback-button"
+              >
+                <MessageSquare className="w-[18px] h-[18px]" />
+              </button>
+            </TooltipTrigger>
+            <TooltipContent side="right" sideOffset={8}>
+              Feedback
+            </TooltipContent>
+          </Tooltip>
         </div>
       </div>
     );

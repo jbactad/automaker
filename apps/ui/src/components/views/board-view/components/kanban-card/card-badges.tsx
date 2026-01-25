@@ -2,7 +2,7 @@
 import { memo, useEffect, useMemo, useState } from 'react';
 import { Feature, useAppStore } from '@/store/app-store';
 import { cn } from '@/lib/utils';
-import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
+import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip';
 import { AlertCircle, Lock, Hand, Sparkles, SkipForward } from 'lucide-react';
 import { getBlockingDependencies } from '@automaker/dependency-resolver';
 import { useShallow } from 'zustand/react/shallow';
@@ -28,24 +28,22 @@ export const CardBadges = memo(function CardBadges({ feature }: CardBadgesProps)
   return (
     <div className="flex flex-wrap items-center gap-1.5 px-3 pt-1.5 min-h-[24px]">
       {/* Error badge */}
-      <TooltipProvider delayDuration={200}>
-        <Tooltip>
-          <TooltipTrigger asChild>
-            <div
-              className={cn(
-                uniformBadgeClass,
-                'bg-[var(--status-error-bg)] border-[var(--status-error)]/40 text-[var(--status-error)]'
-              )}
-              data-testid={`error-badge-${feature.id}`}
-            >
-              <AlertCircle className="w-3.5 h-3.5" />
-            </div>
-          </TooltipTrigger>
-          <TooltipContent side="bottom" className="text-xs max-w-[250px]">
-            <p>{feature.error}</p>
-          </TooltipContent>
-        </Tooltip>
-      </TooltipProvider>
+      <Tooltip>
+        <TooltipTrigger asChild>
+          <div
+            className={cn(
+              uniformBadgeClass,
+              'bg-[var(--status-error-bg)] border-[var(--status-error)]/40 text-[var(--status-error)]'
+            )}
+            data-testid={`error-badge-${feature.id}`}
+          >
+            <AlertCircle className="w-3.5 h-3.5" />
+          </div>
+        </TooltipTrigger>
+        <TooltipContent side="bottom" className="text-xs max-w-[250px]">
+          <p>{feature.error}</p>
+        </TooltipContent>
+      </Tooltip>
     </div>
   );
 });
@@ -138,147 +136,137 @@ export const PriorityBadges = memo(function PriorityBadges({
     <div className="absolute top-2 left-2 flex items-center gap-1">
       {/* Priority badge */}
       {feature.priority && (
-        <TooltipProvider delayDuration={200}>
-          <Tooltip>
-            <TooltipTrigger asChild>
-              <div
-                className={cn(
-                  uniformBadgeClass,
-                  feature.priority === 1 &&
-                    'bg-[var(--status-error-bg)] border-[var(--status-error)]/40 text-[var(--status-error)]',
-                  feature.priority === 2 &&
-                    'bg-[var(--status-warning-bg)] border-[var(--status-warning)]/40 text-[var(--status-warning)]',
-                  feature.priority === 3 &&
-                    'bg-[var(--status-info-bg)] border-[var(--status-info)]/40 text-[var(--status-info)]'
-                )}
-                data-testid={`priority-badge-${feature.id}`}
-              >
-                <span className="font-bold text-xs">
-                  {feature.priority === 1 ? 'H' : feature.priority === 2 ? 'M' : 'L'}
-                </span>
-              </div>
-            </TooltipTrigger>
-            <TooltipContent side="bottom" className="text-xs">
-              <p>
-                {feature.priority === 1
-                  ? 'High Priority'
-                  : feature.priority === 2
-                    ? 'Medium Priority'
-                    : 'Low Priority'}
-              </p>
-            </TooltipContent>
-          </Tooltip>
-        </TooltipProvider>
+        <Tooltip>
+          <TooltipTrigger asChild>
+            <div
+              className={cn(
+                uniformBadgeClass,
+                feature.priority === 1 &&
+                  'bg-[var(--status-error-bg)] border-[var(--status-error)]/40 text-[var(--status-error)]',
+                feature.priority === 2 &&
+                  'bg-[var(--status-warning-bg)] border-[var(--status-warning)]/40 text-[var(--status-warning)]',
+                feature.priority === 3 &&
+                  'bg-[var(--status-info-bg)] border-[var(--status-info)]/40 text-[var(--status-info)]'
+              )}
+              data-testid={`priority-badge-${feature.id}`}
+            >
+              <span className="font-bold text-xs">
+                {feature.priority === 1 ? 'H' : feature.priority === 2 ? 'M' : 'L'}
+              </span>
+            </div>
+          </TooltipTrigger>
+          <TooltipContent side="bottom" className="text-xs">
+            <p>
+              {feature.priority === 1
+                ? 'High Priority'
+                : feature.priority === 2
+                  ? 'Medium Priority'
+                  : 'Low Priority'}
+            </p>
+          </TooltipContent>
+        </Tooltip>
       )}
 
       {/* Manual verification badge */}
       {showManualVerification && (
-        <TooltipProvider delayDuration={200}>
-          <Tooltip>
-            <TooltipTrigger asChild>
-              <div
-                className={cn(
-                  uniformBadgeClass,
-                  'bg-[var(--status-warning-bg)] border-[var(--status-warning)]/40 text-[var(--status-warning)]'
-                )}
-                data-testid={`skip-tests-badge-${feature.id}`}
-              >
-                <Hand className="w-3.5 h-3.5" />
-              </div>
-            </TooltipTrigger>
-            <TooltipContent side="bottom" className="text-xs">
-              <p>Manual verification required</p>
-            </TooltipContent>
-          </Tooltip>
-        </TooltipProvider>
+        <Tooltip>
+          <TooltipTrigger asChild>
+            <div
+              className={cn(
+                uniformBadgeClass,
+                'bg-[var(--status-warning-bg)] border-[var(--status-warning)]/40 text-[var(--status-warning)]'
+              )}
+              data-testid={`skip-tests-badge-${feature.id}`}
+            >
+              <Hand className="w-3.5 h-3.5" />
+            </div>
+          </TooltipTrigger>
+          <TooltipContent side="bottom" className="text-xs">
+            <p>Manual verification required</p>
+          </TooltipContent>
+        </Tooltip>
       )}
 
       {/* Blocked badge */}
       {isBlocked && (
-        <TooltipProvider delayDuration={200}>
-          <Tooltip>
-            <TooltipTrigger asChild>
-              <div
-                className={cn(
-                  uniformBadgeClass,
-                  'bg-orange-500/20 border-orange-500/50 text-orange-500'
-                )}
-                data-testid={`blocked-badge-${feature.id}`}
-              >
-                <Lock className="w-3.5 h-3.5" />
-              </div>
-            </TooltipTrigger>
-            <TooltipContent side="bottom" className="text-xs max-w-[250px]">
-              <p className="font-medium mb-1">
-                Blocked by {blockingDependencies.length} incomplete{' '}
-                {blockingDependencies.length === 1 ? 'dependency' : 'dependencies'}
-              </p>
-              <p className="text-muted-foreground">
-                {blockingDependencies
-                  .map((depId) => {
-                    const dep = features.find((f) => f.id === depId);
-                    return dep?.description || depId;
-                  })
-                  .join(', ')}
-              </p>
-            </TooltipContent>
-          </Tooltip>
-        </TooltipProvider>
+        <Tooltip>
+          <TooltipTrigger asChild>
+            <div
+              className={cn(
+                uniformBadgeClass,
+                'bg-orange-500/20 border-orange-500/50 text-orange-500'
+              )}
+              data-testid={`blocked-badge-${feature.id}`}
+            >
+              <Lock className="w-3.5 h-3.5" />
+            </div>
+          </TooltipTrigger>
+          <TooltipContent side="bottom" className="text-xs max-w-[250px]">
+            <p className="font-medium mb-1">
+              Blocked by {blockingDependencies.length} incomplete{' '}
+              {blockingDependencies.length === 1 ? 'dependency' : 'dependencies'}
+            </p>
+            <p className="text-muted-foreground">
+              {blockingDependencies
+                .map((depId) => {
+                  const dep = features.find((f) => f.id === depId);
+                  return dep?.description || depId;
+                })
+                .join(', ')}
+            </p>
+          </TooltipContent>
+        </Tooltip>
       )}
 
       {/* Just Finished badge */}
       {isJustFinished && (
-        <TooltipProvider delayDuration={200}>
-          <Tooltip>
-            <TooltipTrigger asChild>
-              <div
-                className={cn(
-                  uniformBadgeClass,
-                  'bg-[var(--status-success-bg)] border-[var(--status-success)]/40 text-[var(--status-success)] animate-pulse'
-                )}
-                data-testid={`just-finished-badge-${feature.id}`}
-              >
-                <Sparkles className="w-3.5 h-3.5" />
-              </div>
-            </TooltipTrigger>
-            <TooltipContent side="bottom" className="text-xs">
-              <p>Agent just finished working on this feature</p>
-            </TooltipContent>
-          </Tooltip>
-        </TooltipProvider>
+        <Tooltip>
+          <TooltipTrigger asChild>
+            <div
+              className={cn(
+                uniformBadgeClass,
+                'bg-[var(--status-success-bg)] border-[var(--status-success)]/40 text-[var(--status-success)] animate-pulse'
+              )}
+              data-testid={`just-finished-badge-${feature.id}`}
+            >
+              <Sparkles className="w-3.5 h-3.5" />
+            </div>
+          </TooltipTrigger>
+          <TooltipContent side="bottom" className="text-xs">
+            <p>Agent just finished working on this feature</p>
+          </TooltipContent>
+        </Tooltip>
       )}
 
       {/* Pipeline exclusion badge */}
       {hasPipelineExclusions && (
-        <TooltipProvider delayDuration={200}>
-          <Tooltip>
-            <TooltipTrigger asChild>
-              <div
-                className={cn(
-                  uniformBadgeClass,
-                  allPipelinesExcluded
-                    ? 'bg-violet-500/20 border-violet-500/50 text-violet-500'
-                    : 'bg-violet-500/10 border-violet-500/30 text-violet-400'
-                )}
-                data-testid={`pipeline-exclusion-badge-${feature.id}`}
-              >
-                <SkipForward className="w-3.5 h-3.5" />
-              </div>
-            </TooltipTrigger>
-            <TooltipContent side="bottom" className="text-xs max-w-[250px]">
-              <p className="font-medium mb-1">
-                {allPipelinesExcluded
-                  ? 'All pipelines skipped'
-                  : `${excludedStepCount} of ${totalPipelineSteps} pipeline${totalPipelineSteps !== 1 ? 's' : ''} skipped`}
-              </p>
-              <p className="text-muted-foreground">
-                {allPipelinesExcluded
-                  ? 'This feature will skip all custom pipeline steps'
-                  : 'Some custom pipeline steps will be skipped for this feature'}
-              </p>
-            </TooltipContent>
-          </Tooltip>
-        </TooltipProvider>
+        <Tooltip>
+          <TooltipTrigger asChild>
+            <div
+              className={cn(
+                uniformBadgeClass,
+                allPipelinesExcluded
+                  ? 'bg-violet-500/20 border-violet-500/50 text-violet-500'
+                  : 'bg-violet-500/10 border-violet-500/30 text-violet-400'
+              )}
+              data-testid={`pipeline-exclusion-badge-${feature.id}`}
+            >
+              <SkipForward className="w-3.5 h-3.5" />
+            </div>
+          </TooltipTrigger>
+          <TooltipContent side="bottom" className="text-xs max-w-[250px]">
+            <p className="font-medium mb-1">
+              {allPipelinesExcluded
+                ? 'All pipelines skipped'
+                : `${excludedStepCount} of ${totalPipelineSteps} pipeline${totalPipelineSteps !== 1 ? 's' : ''} skipped`}
+            </p>
+            <p className="text-muted-foreground">
+              {allPipelinesExcluded
+                ? 'This feature will skip all custom pipeline steps'
+                : 'Some custom pipeline steps will be skipped for this feature'}
+            </p>
+          </TooltipContent>
+        </Tooltip>
       )}
     </div>
   );
