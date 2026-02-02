@@ -119,11 +119,19 @@ const nodeModulesAutomaker = join(BUNDLE_DIR, 'node_modules', '@automaker');
 for (const pkgName of LOCAL_PACKAGES) {
   const pkgDir = pkgName.replace('@automaker/', '');
   const nmPkgPath = join(nodeModulesAutomaker, pkgDir);
-  if (existsSync(nmPkgPath) && lstatSync(nmPkgPath).isSymbolicLink()) {
-    const realPath = resolve(BUNDLE_DIR, 'libs', pkgDir);
-    rmSync(nmPkgPath);
-    cpSync(realPath, nmPkgPath, { recursive: true });
-    console.log(`   ✓ Replaced symlink: ${pkgName}`);
+  try {
+    // lstatSync does not follow symlinks, allowing us to check for broken ones
+    if (lstatSync(nmPkgPath).isSymbolicLink()) {
+      const realPath = resolve(BUNDLE_DIR, 'libs', pkgDir);
+      rmSync(nmPkgPath);
+      cpSync(realPath, nmPkgPath, { recursive: true });
+      console.log(`   ✓ Replaced symlink: ${pkgName}`);
+    }
+  } catch (error) {
+    // If the path doesn't exist, lstatSync throws ENOENT. We can safely ignore this.
+    if (error.code !== 'ENOENT') {
+      throw error;
+    }
   }
 }
 

@@ -752,9 +752,7 @@ export function electronUserDataWriteFileSync(
   const fullPath = path.join(electronUserDataPath, relativePath);
   // Ensure parent directory exists (may not exist on first launch)
   const dir = path.dirname(fullPath);
-  if (!fsSync.existsSync(dir)) {
-    fsSync.mkdirSync(dir, { recursive: true });
-  }
+  fsSync.mkdirSync(dir, { recursive: true });
   fsSync.writeFileSync(fullPath, data, options);
 }
 
