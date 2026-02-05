@@ -2657,10 +2657,8 @@ Address the follow-up instructions above. Review the previous work and make the 
       // Load feature for commit message
       const feature = await this.loadFeature(projectPath, featureId);
       const commitMessage = feature
-        ? `feat: ${this.extractTitleFromDescription(
-            feature.description
-          )}\n\nImplemented by Automaker auto-mode`
-        : `feat: Feature ${featureId}`;
+        ? await this.generateCommitMessage(feature, workDir)
+        : `feat: Feature ${featureId}\n\nImplemented by Automaker auto-mode`;
 
       // Determine which files to stage
       // For feature branches, only stage files changed on this branch to avoid committing unrelated changes
@@ -3894,6 +3892,58 @@ Format your response as a structured markdown document.`;
 
     // Truncate to 60 characters and add ellipsis
     return firstLine.substring(0, 57) + '...';
+  }
+
+  /**
+   * Generate a comprehensive commit message for a feature
+   * Includes title, description summary, and file statistics
+   */
+  private async generateCommitMessage(feature: Feature, workDir: string): Promise<string> {
+    const title = this.extractTitleFromDescription(feature.description);
+
+    // Extract description summary (first 3-5 lines, up to 300 chars)
+    let descriptionSummary = '';
+    if (feature.description && feature.description.trim()) {
+      const lines = feature.description.split('\n').filter((l) => l.trim());
+      const summaryLines = lines.slice(0, 5); // First 5 non-empty lines
+      descriptionSummary = summaryLines.join('\n');
+
+      // Limit to 300 characters
+      if (descriptionSummary.length > 300) {
+        descriptionSummary = descriptionSummary.substring(0, 297) + '...';
+      }
+    }
+
+    // Get file statistics to add context
+    let fileStats = '';
+    try {
+      const { stdout: diffStat } = await execAsync('git diff --cached --stat', { cwd: workDir });
+      if (diffStat.trim()) {
+        // Extract just the summary line (last line with file count)
+        const statLines = diffStat.trim().split('\n');
+        const summaryLine = statLines[statLines.length - 1];
+        if (summaryLine && summaryLine.includes('file')) {
+          fileStats = `\n${summaryLine.trim()}`;
+        }
+      }
+    } catch {
+      // Ignore errors getting stats
+    }
+
+    // Build commit message
+    let message = `feat: ${title}`;
+
+    if (descriptionSummary && descriptionSummary !== title) {
+      message += `\n\n${descriptionSummary}`;
+    }
+
+    if (fileStats) {
+      message += fileStats;
+    }
+
+    message += '\n\nImplemented by Automaker auto-mode';
+
+    return message;
   }
 
   /**
