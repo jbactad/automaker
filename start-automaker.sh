@@ -9,7 +9,6 @@ set -e
 # ============================================================================
 # CONFIGURATION & CONSTANTS
 # ============================================================================
-APP_NAME="Automaker"
 # Resolve script directory, following symlinks
 SOURCE="${BASH_SOURCE[0]}"
 while [ -L "$SOURCE" ]; do
@@ -17,6 +16,13 @@ while [ -L "$SOURCE" ]; do
     SOURCE="$(readlink "$SOURCE")"
     [[ $SOURCE != /* ]] && SOURCE="$DIR/$SOURCE"
 done
+
+# Verify the resolved script exists (detect broken symlinks)
+if [ ! -f "$SOURCE" ]; then
+    echo "Error: Script file not found after resolving symlinks: $SOURCE" >&2
+    exit 1
+fi
+
 SCRIPT_DIR="$(cd -P "$(dirname "$SOURCE")" && pwd)"
 
 # Change to project directory so all relative paths work
