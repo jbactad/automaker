@@ -9,13 +9,29 @@ set -e
 # ============================================================================
 # CONFIGURATION & CONSTANTS
 # ============================================================================
+APP_NAME="Automaker"
+# Resolve script directory, following symlinks
+SOURCE="${BASH_SOURCE[0]}"
+while [ -L "$SOURCE" ]; do
+    DIR="$(cd -P "$(dirname "$SOURCE")" && pwd)"
+    SOURCE="$(readlink "$SOURCE")"
+    [[ $SOURCE != /* ]] && SOURCE="$DIR/$SOURCE"
+done
+SCRIPT_DIR="$(cd -P "$(dirname "$SOURCE")" && pwd)"
+
+# Change to project directory so all relative paths work
+cd "$SCRIPT_DIR" || {
+    echo "Error: Could not change to project directory: $SCRIPT_DIR" >&2
+    exit 1
+}
+
+# Load .env file if it exists (must be after cd to project directory)
 if [ -f .env ]; then
     set -a
     . ./.env
     set +a
 fi
-APP_NAME="Automaker"
-SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+
 HISTORY_FILE="${HOME}/.automaker_launcher_history"
 MIN_TERM_WIDTH=70
 MIN_TERM_HEIGHT=20
@@ -1158,9 +1174,6 @@ fi
 # Execute the appropriate command
 case $MODE in
     web)
-        if [ -f .env ]; then
-            export $(grep -v '^#' .env | xargs)
-        fi
         export TEST_PORT="$WEB_PORT"
         export VITE_SERVER_URL="http://${APP_HOST}:$SERVER_PORT"
         export PORT="$SERVER_PORT"
